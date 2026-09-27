@@ -1,0 +1,49 @@
+# Product
+
+<!-- impeccable:product-schema 1 -->
+
+## Platform
+
+web
+
+## Stack
+
+Static HTML + Tailwind (user choice). Single `index.html`, no build step, host anywhere.
+
+## Users
+
+Mixed audience (confirmed): Zambian SMEs and established businesses, startups and founders with an app idea, and larger organisations (enterprise, NGOs, government). All arrive wanting a capable local technology partner for web, mobile, or business email.
+
+## Product Purpose
+
+DHM Group is a technology company offering web development, mobile app development, and email hosting. The landing page exists to convert visitors into project quote requests.
+
+## Positioning
+
+DHM does not only build for clients; it ships and runs its own consumer apps in production on iOS and Android: **Pepaala News** (a Zambian news aggregator) and **Nchito** (a job board). That live product track record is the claim a typical agency cannot copy.
+
+## Capabilities and Constraints
+
+- Services: web development, mobile development (iOS and Android), email hosting.
+- Own products: Pepaala News (iOS, Android), Nchito (iOS, Android).
+- Primary conversion: project quote request form (name, email, service, brief).
+- Undecided: form submission backend (no endpoint provided yet).
+
+## Brand Commitments
+
+- Name: DHM Group. Tagline: "endless possibilities".
+- Colours: orange `#F05A2B`, black `#000000` (binding).
+- Visual stance (user choice, after two re-rolls): clean, premium tech studio executed straight, no themed metaphor. Craft bar: Linear and Framer.
+- Assets: `logo.png` (black DHM wordmark, orange accent shard, "GROUP" beneath), `tagline.png` (white "endless possibilities" with orange hand-drawn swash; designed for dark backgrounds).
+
+## Evidence on Hand
+
+- User has App Store / Play Store links and contact info (city, phone, email) but has not supplied values yet: marked TODO in source.
+- No client names, testimonials, download counts, or statistics. Do not fabricate any.
+
+## Product Principles
+
+1. Proof through shipped products, not adjectives.
+2. One clear next step: request a quote.
+3. Speak plainly to both a small shop owner and a procurement officer.
+4. Local and credible: Zambian context without being parochial.
