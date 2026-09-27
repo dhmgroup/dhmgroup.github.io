@@ -38,7 +38,10 @@ DHM does not only build for clients; it ships and runs its own consumer apps in 
 
 ## Evidence on Hand
 
-- User has App Store / Play Store links and contact info (city, phone, email) but has not supplied values yet: marked TODO in source.
+- Contact (confirmed): registered address Plot 4280 Chikola Loop Area, Chingola, Zambia; +260 770 005 939; contact@dhmgroup.net.
+- Social: linkedin.com/company/dhmgroup and facebook.com/dhmgroup (confirmed); Instagram, X, TikTok, YouTube assumed at username "dhmgroup" (user asked, not verified).
+- App landing pages: https://pepaala.dhmgroup.net (Pepaala News), https://nchito.dhmgroup.net (Nchito).
+- App Store / Play Store links: not yet supplied, TODO in source.
 - No client names, testimonials, download counts, or statistics. Do not fabricate any.
 
 ## Product Principles
