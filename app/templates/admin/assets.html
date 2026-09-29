@@ -27,7 +27,7 @@
       <span class="hidden group-[.htmx-request]:inline">Uploading…</span>
     </button>
     <progress class="hidden h-1 w-full appearance-none overflow-hidden rounded-full bg-raised accent-brand group-[.htmx-request]:block" aria-label="Uploading"></progress>
-    <p class="w-full text-xs text-muted">PNG, JPEG, WebP, AVIF, SVG, ICO or PDF, up to 10 MB.</p>
+    <p class="w-full text-xs text-muted">PNG, JPEG, WebP, AVIF, SVG, ICO or PDF, up to 10 MB. SVG files can contain scripts: they are only safe because uploads are served from a separate domain, never from dhmgroup.net itself.</p>
   </form>
   {% include "admin/_asset_grid.html" %}
 {% endblock %}

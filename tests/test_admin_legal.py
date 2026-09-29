@@ -72,3 +72,13 @@ async def test_new_page_form(admin_client):
     r = await admin_client.get("/admin/legal/new")
     assert r.status_code == 200
     assert 'action="/admin/legal"' in r.text
+
+
+async def test_duplicate_slug_on_edit_is_a_field_error(admin_client, session):
+    await seed(session)
+    terms = await session.scalar(select(LegalPage).where(LegalPage.slug == "terms"))
+    r = await admin_client.post(
+        f"/admin/legal/{terms.id}", data={**NEW, "slug": "privacy"}, headers=HX
+    )
+    assert r.status_code == 422
+    assert "That address is already used" in r.text

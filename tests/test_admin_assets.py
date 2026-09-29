@@ -122,3 +122,21 @@ async def test_filter_and_search(admin_client, session):
     ]
     assert names((await admin_client.get("/admin/assets?q=LOGO", headers=HX)).text) == ["logo.png"]
     assert len(names((await admin_client.get("/admin/assets?kind=bogus", headers=HX)).text)) == 3
+
+
+async def test_oversize_body_refused_before_parsing(admin_client):
+    r = await admin_client.post(
+        "/admin/assets",
+        content=b"x",
+        headers={
+            **HX,
+            "Content-Type": "multipart/form-data; boundary=x",
+            "Content-Length": str(50 * 1024 * 1024),
+        },
+    )
+    assert r.status_code == 413
+
+
+async def test_library_warns_about_svg(admin_client):
+    assert "SVG" in (await admin_client.get("/admin/assets")).text
+    assert "separate domain" in (await admin_client.get("/admin/assets")).text

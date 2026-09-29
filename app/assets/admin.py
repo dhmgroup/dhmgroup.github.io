@@ -1,9 +1,10 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.datastructures import UploadFile
 
 from app.admin.context import admin_context
 from app.admin.forms import hx_toast
@@ -112,10 +113,17 @@ async def library(
 @router.post("")
 async def upload(
     request: Request,
-    file: UploadFile,
     session: AsyncSession = Depends(get_session),
     user: User = Depends(require_admin),
 ):
+    # No UploadFile parameter: FastAPI would parse (and spool to disk) the whole body
+    # before require_admin runs. Here auth has passed and oversize bodies stop unread.
+    if int(request.headers.get("content-length") or 0) > MAX_BYTES + 64 * 1024:
+        return await _grid(request, session, 413, "That file is over 10 MB.")
+    form = await request.form()
+    file = form.get("file")
+    if not isinstance(file, UploadFile):
+        return await _grid(request, session, 422, "Choose a file to upload.")
     data = await file.read(MAX_BYTES + 1)
     if len(data) > MAX_BYTES:
         return await _grid(request, session, 413, "That file is over 10 MB.")
@@ -127,7 +135,6 @@ async def upload(
     ext, content_type = detected
     key = f"uploads/{uuid.uuid4()}{ext}"
     await storage.put(key, data, content_type)
-    form = await request.form()
     asset = Asset(
         key=key,
         filename=(file.filename or "upload")[:255],

@@ -95,7 +95,7 @@ uv run alembic check
 3. **Environment.** The image already runs with `ENV=production` and refuses to start without a real `SECRET_KEY`. Set `SECRET_KEY`, `DATABASE_URL`, `BASE_URL=https://dhmgroup.net` and the `SMTP_*` variables for the mail server that sends inquiry notifications.
 4. **Domain.** Assign `dhmgroup.net` (and `www.dhmgroup.net` if used). Coolify's proxy handles TLS.
 5. **Deploy.** Migrations run automatically on container start. After the first deploy, open the application terminal in Coolify and run `dhm seed`.
-6. **Storage.** Add MinIO as a Coolify service (or use AWS S3 / Cloudflare R2), create the bucket, allow anonymous downloads on it, and set the `S3_*` variables.
+6. **Storage.** Add MinIO as a Coolify service (or use AWS S3 / Cloudflare R2), create the bucket, allow anonymous downloads on it, and set the `S3_*` variables. Serve the bucket from its **own domain** (for example `assets.dhmgroup.net`), never from dhmgroup.net: uploaded SVGs can contain scripts, which are harmless only on a separate origin.
 7. **Health.** The container reports health from `/healthz`, which also checks the database.
 
 ## Cutover from GitHub Pages

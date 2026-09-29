@@ -47,5 +47,6 @@ document.addEventListener('htmx:confirm', e => {
   confirmDialog.addEventListener('close', () => {
     confirmDialog.returnValue === 'confirm' ? issueRequest() : dropRequest();
   }, { once: true });
+  confirmDialog.returnValue = '';  // Escape closes without setting a new value
   confirmDialog.showModal();
 });

@@ -81,6 +81,7 @@ async def _save(request, session, user, page: LegalPage | None):
         form = LegalForm.model_validate(data)
     except ValidationError as exc:
         return await _render(request, session, user, shown, data, field_errors(exc, MESSAGES), 422)
+    page_id = page.id if page else None  # read before commit: rollback expires the object
     target = page or LegalPage()
     for field, value in form.model_dump().items():
         setattr(target, field, value)
@@ -90,7 +91,7 @@ async def _save(request, session, user, page: LegalPage | None):
         await session.commit()
     except IntegrityError:
         await session.rollback()
-        shown = await _get(session, page.id) if page else _blank()
+        shown = await _get(session, page_id) if page_id else _blank()
         return await _render(request, session, user, shown, data, {"slug": DUPLICATE}, 422)
     if not is_htmx(request):
         return RedirectResponse(f"/admin/legal/{target.id}", status_code=303)
