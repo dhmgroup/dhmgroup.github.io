@@ -1,0 +1,12 @@
+{% macro social_links(site, link_class) -%}
+  {% for label, icon, url in site.socials %}
+    <li>
+      <a href="{{ url }}" target="_blank" rel="noopener" aria-label="{{ label }}" class="{{ link_class }}"><i class="ph {{ icon }}" aria-hidden="true"></i></a>
+    </li>
+  {% endfor %}
+{%- endmacro %}
+
+{% macro store_link(url, icon, label) -%}
+  <a {% if url %}href="{{ url }}" target="_blank" rel="noopener"{% else %}aria-disabled="true" title="Store link coming soon"{% endif %}
+     class="btn btn-ghost text-sm aria-disabled:pointer-events-none aria-disabled:opacity-50"><i class="ph-fill {{ icon }}" aria-hidden="true"></i>{{ label }}</a>
+{%- endmacro %}
