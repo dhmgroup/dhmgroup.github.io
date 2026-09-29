@@ -385,84 +385,8 @@
               {{ social_links(site, "grid size-10 place-items-center rounded-full border border-line text-xl text-muted transition-all duration-700 ease-fluid hover:border-white/40 hover:text-white active:scale-[0.98]") }}
             </ul>
           </div>
-          <div class="reveal [--d:120ms]">
-            <form id="quote-form" novalidate class="flex flex-col gap-4" data-contact-email="{{ site.contact_email }}">
-              <div class="grid gap-4 sm:grid-cols-2">
-                <label class="flex flex-col gap-2 text-sm font-medium">
-                  Your name
-                  <input name="name"
-                         autocomplete="name"
-                         required
-                         class="field"
-                         placeholder="Chanda Mulenga">
-                  <span class="err hidden text-sm font-normal text-brand" role="alert"></span>
-                </label>
-                <label class="flex flex-col gap-2 text-sm font-medium">
-                  Work email
-                  <input name="email"
-                         type="email"
-                         autocomplete="email"
-                         required
-                         class="field"
-                         placeholder="chanda@company.co.zm">
-                  <span class="err hidden text-sm font-normal text-brand" role="alert"></span>
-                </label>
-              </div>
-              <label class="flex flex-col gap-2 text-sm font-medium">
-                Company <span class="sr-only">(optional)</span>
-                <input name="company"
-                       autocomplete="organization"
-                       class="field"
-                       placeholder="Optional">
-              </label>
-              <fieldset class="flex flex-col gap-2">
-                <legend class="mb-2 text-sm font-medium">What do you need?</legend>
-                <div class="flex flex-wrap gap-2">
-                  <label class="cursor-pointer">
-                    <input type="checkbox" name="service" value="Website" class="peer sr-only"><span class="block rounded-full border border-line px-3 py-2 text-sm transition-all duration-700 ease-fluid hover:border-white/40 peer-checked:border-brand peer-checked:bg-brand peer-checked:text-black peer-focus-visible:outline-2 peer-focus-visible:outline-brand">Website</span>
-                  </label>
-                  <label class="cursor-pointer">
-                    <input type="checkbox"
-                           name="service"
-                           value="Mobile app"
-                           class="peer sr-only"><span class="block rounded-full border border-line px-3 py-2 text-sm transition-all duration-700 ease-fluid hover:border-white/40 peer-checked:border-brand peer-checked:bg-brand peer-checked:text-black peer-focus-visible:outline-2 peer-focus-visible:outline-brand">Mobile app</span>
-                  </label>
-                  <label class="cursor-pointer">
-                    <input type="checkbox"
-                           name="service"
-                           value="Email hosting"
-                           class="peer sr-only"><span class="block rounded-full border border-line px-3 py-2 text-sm transition-all duration-700 ease-fluid hover:border-white/40 peer-checked:border-brand peer-checked:bg-brand peer-checked:text-black peer-focus-visible:outline-2 peer-focus-visible:outline-brand">Email hosting</span>
-                  </label>
-                  <label class="cursor-pointer">
-                    <input type="checkbox"
-                           name="service"
-                           value="Not sure yet"
-                           class="peer sr-only"><span class="block rounded-full border border-line px-3 py-2 text-sm transition-all duration-700 ease-fluid hover:border-white/40 peer-checked:border-brand peer-checked:bg-brand peer-checked:text-black peer-focus-visible:outline-2 peer-focus-visible:outline-brand">Not sure yet</span>
-                  </label>
-                </div>
-              </fieldset>
-              <label class="flex flex-col gap-2 text-sm font-medium">
-                Tell us about the project
-                <textarea name="message"
-                          rows="4"
-                          required
-                          class="field resize-y"
-                          placeholder="What you want built, who it is for, and any deadline."></textarea>
-                <span class="err hidden text-sm font-normal text-brand" role="alert"></span>
-              </label>
-              <p id="form-error"
-                 class="hidden rounded-xl border border-brand/60 px-3 py-3 text-sm"
-                 role="alert"></p>
-              <button type="submit"
-                      class="btn btn-primary mt-2 self-start text-base disabled:animate-pulse disabled:bg-brand/60">Request a quote <i class="ph ph-arrow-right" aria-hidden="true"></i></button>
-            </form>
-            <div id="form-done"
-                 class="hidden flex-col items-start gap-4"
-                 tabindex="-1">
-              <span class="grid size-12 place-items-center rounded-full bg-brand text-2xl text-black"><i class="ph ph-check" aria-hidden="true"></i></span>
-              <h3 class="text-2xl font-semibold tracking-tight">Request received.</h3>
-              <p class="text-muted">Thanks, <span data-done-name></span>. We will reply to <span data-done-email class="text-white"></span> with next steps.</p>
-            </div>
+          <div id="quote-panel" class="reveal [--d:120ms]">
+{% include "public/_quote_form.html" %}
           </div>
         </div>
       </section>
@@ -501,5 +425,6 @@
         </div>
       </div>
     </footer>
+    <script src="/static/vendor/htmx/htmx.min.js" defer></script>
     <script src="/static/js/site.js" defer></script>
 {% endblock %}

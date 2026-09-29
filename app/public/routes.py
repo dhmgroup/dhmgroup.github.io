@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.db import get_session
+from app.inquiries.forms import SERVICES
 from app.legal.routes import published_pages
 from app.projects.models import Project, ProjectStatus
 from app.site.models import SiteSettings, get_site_settings
@@ -31,8 +32,8 @@ def organization_ld(site: SiteSettings) -> dict:
     }
 
 
-@router.get("/")
-async def home(request: Request, session: AsyncSession = Depends(get_session)):
+async def home_context(session: AsyncSession) -> dict:
+    """Everything the landing page template needs; the inquiries route reuses it."""
     site = await get_site_settings(session)
     projects = (
         await session.scalars(
@@ -41,16 +42,23 @@ async def home(request: Request, session: AsyncSession = Depends(get_session)):
             .order_by(Project.sort_order, Project.id)
         )
     ).all()
-    return templates.TemplateResponse(
-        request,
-        "public/index.html",
-        {
-            "site": site,
-            "projects": projects,
-            "legal_pages": await published_pages(session),
-            "org_ld": organization_ld(site),
-        },
-    )
+    return {
+        "site": site,
+        "projects": projects,
+        "legal_pages": await published_pages(session),
+        "org_ld": organization_ld(site),
+        "quote_services": SERVICES,
+        "form": None,
+        "errors": {},
+        "done": False,
+    }
+
+
+@router.get("/")
+async def home(request: Request, sent: bool = False, session: AsyncSession = Depends(get_session)):
+    context = await home_context(session)
+    context["done"] = sent
+    return templates.TemplateResponse(request, "public/index.html", context)
 
 
 @router.get("/app-ads.txt")

@@ -1,0 +1,89 @@
+{#- Quote panel body. Context: form (QuoteForm or None), errors (dict), done (bool), quote_services. -#}
+{% if done %}
+            <div id="form-done" class="flex flex-col items-start gap-4" tabindex="-1">
+              <span class="grid size-12 place-items-center rounded-full bg-brand text-2xl text-black"><i class="ph ph-check" aria-hidden="true"></i></span>
+              <h3 class="text-2xl font-semibold tracking-tight">Request received.</h3>
+              <p class="text-muted">{% if form and form.name %}Thanks, {{ form.first_name }}. We will reply to <span class="text-white">{{ form.email }}</span> with next steps.{% else %}Thanks. We will reply with next steps.{% endif %}</p>
+            </div>
+{% else %}
+            <form id="quote-form"
+                  method="post"
+                  action="/inquiries"
+                  novalidate
+                  class="flex flex-col gap-4"
+                  hx-post="/inquiries"
+                  hx-target="#quote-panel"
+                  hx-swap="innerHTML"
+                  hx-disable="find button"
+                  hx-status:5xx="swap:none">
+              <div class="hidden" aria-hidden="true">
+                <label>Leave this empty <input name="website" tabindex="-1" autocomplete="off"></label>
+              </div>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <label class="flex flex-col gap-2 text-sm font-medium">
+                  Your name
+                  <input name="name"
+                         autocomplete="name"
+                         required
+                         maxlength="120"
+                         value="{{ form.name if form }}"
+                         {% if errors.name %}aria-invalid="true"{% endif %}
+                         class="field{% if errors.name %} !border-brand{% endif %}"
+                         placeholder="Chanda Mulenga">
+                  <span class="err{% if not errors.name %} hidden{% endif %} text-sm font-normal text-brand" role="alert">{{ errors.name }}</span>
+                </label>
+                <label class="flex flex-col gap-2 text-sm font-medium">
+                  Work email
+                  <input name="email"
+                         type="email"
+                         autocomplete="email"
+                         required
+                         maxlength="254"
+                         value="{{ form.email if form }}"
+                         {% if errors.email %}aria-invalid="true"{% endif %}
+                         class="field{% if errors.email %} !border-brand{% endif %}"
+                         placeholder="chanda@company.co.zm">
+                  <span class="err{% if not errors.email %} hidden{% endif %} text-sm font-normal text-brand" role="alert">{{ errors.email }}</span>
+                </label>
+              </div>
+              <label class="flex flex-col gap-2 text-sm font-medium">
+                Company <span class="sr-only">(optional)</span>
+                <input name="company"
+                       autocomplete="organization"
+                       maxlength="160"
+                       value="{{ form.company if form }}"
+                       class="field"
+                       placeholder="Optional">
+              </label>
+              <fieldset class="flex flex-col gap-2">
+                <legend class="mb-2 text-sm font-medium">What do you need?</legend>
+                <div class="flex flex-wrap gap-2">
+                  {% for service in quote_services %}
+                  <label class="cursor-pointer">
+                    <input type="checkbox"
+                           name="service"
+                           value="{{ service }}"
+                           {% if form and service in form.services %}checked{% endif %}
+                           class="peer sr-only"><span class="block rounded-full border border-line px-3 py-2 text-sm transition-all duration-700 ease-fluid hover:border-white/40 peer-checked:border-brand peer-checked:bg-brand peer-checked:text-black peer-focus-visible:outline-2 peer-focus-visible:outline-brand">{{ service }}</span>
+                  </label>
+                  {% endfor %}
+                </div>
+              </fieldset>
+              <label class="flex flex-col gap-2 text-sm font-medium">
+                Tell us about the project
+                <textarea name="message"
+                          rows="4"
+                          required
+                          maxlength="5000"
+                          {% if errors.message %}aria-invalid="true"{% endif %}
+                          class="field resize-y{% if errors.message %} !border-brand{% endif %}"
+                          placeholder="What you want built, who it is for, and any deadline.">{{ form.message if form }}</textarea>
+                <span class="err{% if not errors.message %} hidden{% endif %} text-sm font-normal text-brand" role="alert">{{ errors.message }}</span>
+              </label>
+              <p id="form-error"
+                 class="{% if not errors.form %}hidden {% endif %}rounded-xl border border-brand/60 px-3 py-3 text-sm"
+                 role="alert">{{ errors.form }}</p>
+              <button type="submit"
+                      class="btn btn-primary mt-2 self-start text-base disabled:animate-pulse disabled:bg-brand/60">Request a quote <i class="ph ph-arrow-right" aria-hidden="true"></i></button>
+            </form>
+{% endif %}

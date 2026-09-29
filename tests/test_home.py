@@ -94,3 +94,20 @@ async def test_database_error_renders_500_page(client):
     r = await client.get("/")
     assert r.status_code == 500
     assert "Something went wrong on our side." in r.text
+
+
+async def test_quote_form_is_htmx_and_has_fallback(client):
+    t = (await client.get("/")).text
+    assert 'hx-post="/inquiries"' in t
+    assert 'method="post"' in t and 'action="/inquiries"' in t
+    assert 'hx-target="#quote-panel"' in t
+    assert 'name="website"' in t  # honeypot
+    assert "/static/vendor/htmx/htmx.min.js" in t
+    assert 'id="form-done"' not in t
+
+
+async def test_sent_flag_shows_confirmation(client):
+    t = (await client.get("/?sent=1")).text
+    assert 'id="form-done"' in t
+    assert "Request received." in t
+    assert 'id="quote-form"' not in t
