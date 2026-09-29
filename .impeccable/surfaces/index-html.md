@@ -1,11 +1,11 @@
 ---
 version: 1
 slug: "index-html"
-primary_target: "index.html"
+primary_target: "app/templates/public/index.html"
 related_targets: []
 ---
 
-# Surface: company landing page (index.html)
+# Surface: company landing page (app/templates/public/index.html)
 
 Mode: Persuade. Audience: mixed (SMEs, founders, larger organisations). Action: request a project quote (form). Proof: Pepaala News and Nchito live on iOS and Android (store links TODO). Constraints: landing-page-design skill (Geist, Tailwind scale/spacing, hero gradient text, glass pill nav, tagline word reveal), brand orange #F05A2B and black.
 

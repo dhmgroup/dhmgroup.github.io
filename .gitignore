@@ -10,3 +10,7 @@ __pycache__/
 
 # Build output
 app/static/dist/
+
+# Tool caches
+.impeccable/hook.cache.json
+.impeccable/questions/

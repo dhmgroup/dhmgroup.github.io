@@ -4,31 +4,13 @@
     "ignoreFiles": [],
     "ignoreValues": [
       {
-        "rule": "flat-type-hierarchy",
+        "rule": "gradient-text",
         "value": "*",
         "files": [
-          "index.html"
+          "app/templates/base.html"
         ],
-        "createdAt": "2026-09-27T13:02:31.876Z",
-        "reason": "agent decided: sizes come from Tailwind browser-runtime classes the static detector cannot resolve; finish reviewer measured h1 48px vs h2 36px in captures"
-      },
-      {
-        "rule": "flat-type-hierarchy",
-        "value": "*",
-        "files": [
-          "legal.html"
-        ],
-        "createdAt": "2026-09-27T13:02:33.098Z",
-        "reason": "agent decided: Tailwind runtime classes (text-4xl heading vs base body) unresolvable statically"
-      },
-      {
-        "rule": "nested-cards",
-        "value": "*",
-        "files": [
-          "index.html"
-        ],
-        "createdAt": "2026-09-27T13:02:34.604Z",
-        "reason": "agent decided: nesting is intentional illustrative device/browser/inbox mockups inside service panels, labelled illustrative"
+        "createdAt": "2026-09-29T06:11:52.238Z",
+        "reason": "DESIGN.md sanctions it: the single gradient in the system is the white-to-#9B9B9B text fill on the hero and 404 headings (Flat Ground Rule / Display type)"
       }
     ]
   }
