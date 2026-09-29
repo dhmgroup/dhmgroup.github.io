@@ -1,0 +1,45 @@
+{% from "admin/_macros.html" import text_field, textarea_field, switch %}
+{% macro val(name) %}{% set x = values[name] if name in values else project[name] %}{{ x if x is not none }}{% endmacro %}
+{% if project %}
+<section id="project-editor" class="fixed inset-0 z-30 flex flex-col overflow-y-auto bg-black pb-20 sm:left-16 sm:pb-0 lg:static lg:z-auto lg:flex-1" aria-labelledby="project-editor-title">
+  <header class="flex min-h-16 items-center gap-3 border-b border-line px-4 sm:px-6">
+    <a href="/admin/projects" class="-ml-2 rounded-lg p-2 text-muted transition-colors duration-200 hover:text-white lg:hidden" aria-label="Back to projects"><i class="ph ph-arrow-left text-xl" aria-hidden="true"></i></a>
+    <h2 id="project-editor-title" class="min-w-0 flex-1 truncate text-xl font-semibold tracking-tight" tabindex="-1" data-autofocus>{{ project.name or "New project" }}</h2>
+    {% if project.id %}<a href="/#apps" target="_blank" rel="noopener" class="btn btn-ghost text-sm"><i class="ph ph-arrow-square-out" aria-hidden="true"></i>View on site</a>{% endif %}
+  </header>
+  <form method="post" action="/admin/projects{% if project.id %}/{{ project.id }}{% endif %}"
+        hx-post="/admin/projects{% if project.id %}/{{ project.id }}{% endif %}" hx-target="#project-editor" hx-swap="outerHTML"
+        class="flex max-w-2xl flex-col gap-4 px-4 py-6 sm:px-6">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {{ text_field("name", "Name", val("name"), errors.name, required=True, maxlength=100) }}
+    {{ textarea_field("summary", "Summary", val("summary"), errors.summary, rows=2, hint="One line shown under the name on dhmgroup.net", maxlength=300) }}
+    {{ text_field("url", "Project website", val("url"), errors.url, type="url", hint="https:// link, or leave empty", mono=True) }}
+    <div class="grid gap-4 sm:grid-cols-2">
+      {{ text_field("ios_url", "App Store link", val("ios_url"), errors.ios_url, type="url", hint="Empty shows a disabled button", mono=True) }}
+      {{ text_field("android_url", "Google Play link", val("android_url"), errors.android_url, type="url", hint="Empty shows a disabled button", mono=True) }}
+    </div>
+    {% set current_status = values.status if "status" in values else project.status %}
+    <label class="flex flex-col gap-2 text-sm font-medium">
+      Status
+      <select name="status" class="field py-2 text-sm">
+        {% for value, label in status_labels.items() %}<option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <span class="text-xs font-normal text-muted">Live shows the orange Live dot. Retired projects are hidden.</span>
+    </label>
+    {{ switch("is_published", "Published on dhmgroup.net", (values.is_published == "true") if values else project.is_published) }}
+    <div class="flex items-center gap-3 pt-2">
+      <button type="submit" class="btn btn-primary text-sm">{{ "Save project" if project.id else "Create project" }}</button>
+      {% if errors %}<p class="text-sm text-brand" role="alert">Fix the highlighted fields.</p>{% endif %}
+    </div>
+  </form>
+  {% if project.id %}
+  <form method="post" action="/admin/projects/{{ project.id }}/delete" hx-post="/admin/projects/{{ project.id }}/delete" hx-target="#project-editor" hx-swap="outerHTML"
+        hx-confirm="Delete {{ project.name }}? It disappears from dhmgroup.net." class="border-t border-line px-4 py-6 sm:px-6">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="btn btn-ghost text-sm"><i class="ph ph-trash" aria-hidden="true"></i>Delete project</button>
+  </form>
+  {% endif %}
+</section>
+{% else %}
+<section id="project-editor" class="hidden flex-1 items-center justify-center text-sm text-muted lg:flex">Choose a project to edit, or add a new one.</section>
+{% endif %}
