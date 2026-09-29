@@ -1,6 +1,7 @@
-"""`dhm` command: uv run dhm {css,dev}."""
+"""`dhm` command: uv run dhm {css,dev,seed}."""
 
 import argparse
+import asyncio
 import os
 import shutil
 import subprocess
@@ -37,18 +38,31 @@ def dev() -> None:
         watcher.terminate()
 
 
+async def _seed() -> None:
+    from app.db import SessionLocal, engine
+    from app.seed import seed
+
+    async with SessionLocal() as session:
+        await seed(session)
+    await engine.dispose()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="dhm")
     sub = parser.add_subparsers(dest="command", required=True)
     css_p = sub.add_parser("css", help="build Tailwind CSS")
     css_p.add_argument("--watch", action="store_true")
     sub.add_parser("dev", help="run uvicorn with reload plus Tailwind watch")
+    sub.add_parser("seed", help="insert default content (safe to re-run)")
     args = parser.parse_args()
 
     if args.command == "css":
         css(args.watch)
     elif args.command == "dev":
         dev()
+    elif args.command == "seed":
+        asyncio.run(_seed())
+        print("Seeded.")
 
 
 if __name__ == "__main__":

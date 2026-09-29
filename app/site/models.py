@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import CheckConstraint, String, Text
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base, utcnow
@@ -14,6 +15,19 @@ SOCIALS = [
     ("tiktok_url", "TikTok", "ph-tiktok-logo"),
     ("youtube_url", "YouTube", "ph-youtube-logo"),
 ]
+
+DEFAULTS = {
+    "contact_email": "contact@dhmgroup.net",
+    "phone": "+260 770 005 939",
+    "address": "Plot 4280 Chikola Loop Area\nChingola, Zambia",
+    "notify_email": "contact@dhmgroup.net",
+    "linkedin_url": "https://www.linkedin.com/company/dhmgroup",
+    "facebook_url": "https://www.facebook.com/dhmgroup",
+    "instagram_url": "https://www.instagram.com/dhmgroup",
+    "x_url": "https://x.com/dhmgroup",
+    "tiktok_url": "https://www.tiktok.com/@dhmgroup",
+    "youtube_url": "https://www.youtube.com/@dhmgroup",
+}
 
 
 class SiteSettings(Base):
@@ -50,3 +64,8 @@ class SiteSettings(Base):
         return [
             (label, icon, url) for field, label, icon in SOCIALS if (url := getattr(self, field))
         ]
+
+
+async def get_site_settings(session: AsyncSession) -> SiteSettings:
+    """The settings row, or unsaved defaults so an unseeded database still renders."""
+    return await session.get(SiteSettings, 1) or SiteSettings(id=1, **DEFAULTS)
