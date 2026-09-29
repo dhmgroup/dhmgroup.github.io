@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Static HTML + Tailwind (user choice). Single `index.html`, no build step, host anywhere.
+FastAPI + Jinja2 + htmx v4 + Tailwind v4, Postgres, deployed on Coolify (migration from the original static `index.html`; see `docs/superpowers/specs/2026-09-29-dhm-web-fullstack-design.md`).
 
 ## Users
 
@@ -27,7 +27,7 @@ DHM does not only build for clients; it ships and runs its own consumer apps in 
 - Services: web development, mobile development (iOS and Android), email hosting.
 - Own products: Pepaala News (iOS, Android), Nchito (iOS, Android).
 - Primary conversion: project quote request form (name, email, service, brief).
-- Undecided: form submission backend (no endpoint provided yet).
+- Quote requests are stored in Postgres and emailed to the team (Phase 2).
 
 ## Brand Commitments
 
