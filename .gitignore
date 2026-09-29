@@ -1,2 +1,12 @@
 # Gitignore for Jekyll
 CNAME
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+
+# Build output
+app/static/dist/

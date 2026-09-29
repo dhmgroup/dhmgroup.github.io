@@ -1,0 +1,52 @@
+[project]
+name = "dhm-web"
+version = "0.1.0"
+description = "DHM Group website and admin dashboard"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.20",
+    "asyncpg>=0.31",
+    "fastapi>=0.141",
+    "jinja2>=3.1.6",
+    "markdown-it-py>=4.2",
+    "nh3>=0.3.7",
+    "pydantic-settings>=2.15",
+    "sqlalchemy[asyncio]>=2.1.1",
+    "uvicorn[standard]>=0.54",
+]
+
+[project.scripts]
+dhm = "app.cli:main"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytailwindcss>=0.3.1",
+    "pytest>=9.1",
+    "pytest-asyncio>=1.4",
+    "ruff>=0.16",
+]
+
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "app"
+module-root = ""
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = ["docs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends"]

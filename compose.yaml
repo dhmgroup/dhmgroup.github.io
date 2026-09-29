@@ -1,0 +1,20 @@
+# Local development only. Production services are provisioned in Coolify.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: dhm
+      POSTGRES_PASSWORD: dhm
+      POSTGRES_DB: dhm
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dhm"]
+      interval: 2s
+      retries: 20
+
+volumes:
+  pgdata:

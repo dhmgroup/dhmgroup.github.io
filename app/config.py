@@ -1,0 +1,12 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    env: str = "development"
+    database_url: str = "postgresql+asyncpg://dhm:dhm@localhost:5433/dhm"
+    base_url: str = "http://localhost:8000"
+
+
+settings = Settings()
