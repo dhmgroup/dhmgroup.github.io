@@ -156,9 +156,23 @@ Markdown is rendered with markdown-it-py and sanitised with nh3 (allowlist: head
 | company | varchar(160) null | |
 | services | JSONB list of strings | subset of `Website`, `Mobile app`, `Email hosting`, `Not sure yet` |
 | message | text, max 5000 chars | required |
-| status | enum `new`, `read`, `archived` | |
+| stage | enum `new`, `contacted`, `quoted`, `won`, `lost` | pipeline stage (amended 2026-09-29, replaces the original `status`) |
+| archived | bool, default false | spam or irrelevant; hidden from the pipeline, separate from `lost` |
+| read_at | timestamptz null | null means unread; set when an admin first opens the record |
 | created_at | timestamptz | |
 | notified_at | timestamptz null | null means the email was not sent |
+
+### inquiry_events (amended 2026-09-29)
+| Column | Type | Notes |
+|---|---|---|
+| id | int PK | |
+| inquiry_id | FK inquiries, ON DELETE CASCADE | |
+| author_id | FK users null, ON DELETE SET NULL | null for system events |
+| kind | enum `note`, `stage`, `system` | `stage` rows are written automatically on a stage change; `system` covers archive/unarchive and resends |
+| body | text | note text, or a sentence such as "Moved to Quoted" |
+| created_at | timestamptz | |
+
+The record shows events newest first as an activity timeline.
 
 ### assets
 | Column | Type | Notes |
@@ -201,13 +215,17 @@ Existing rows are left untouched on re-run (insert only when missing).
 |---|---|
 | `/admin/login`, `/admin/logout` | Session auth |
 | `/admin` | Overview: unread inquiry count, recent inquiries, quick links |
-| `/admin/inquiries` | Inbox with status filter; view marks read; archive; resend notification |
+| `/admin/inquiries` | Pipeline list with stage tabs (New, Contacted, Quoted, Won, Lost, Archived), search, 50 per page; `/admin/inquiries/{id}` record: opening marks read; stage control; notes; Reply by email (mailto, subject "Re: Your quote request – DHM Group"); archive/unarchive; resend notification |
 | `/admin/legal` | List, create, edit (Markdown + preview), publish toggle, delete |
 | `/admin/projects` | List, create, edit, publish toggle, reorder (move up/down), delete |
 | `/admin/settings` | Contact details, socials, notify email, asset slots |
 | `/admin/assets` | Library grid, upload, edit alt text, copy URL, delete |
 
 htmx handles partial updates (row swaps, preview, reorder, upload result, toasts). Every admin screen also works as a full page load.
+
+### Admin design (amended 2026-09-29)
+
+Chosen through the impeccable shape round; the persisted brief is `.impeccable/surfaces/app-templates-admin-layout-html.md` and binds the build. Summary: **The Ledger**: DESIGN.md tokens, quieter than the public site (no reveals, gradients or display type; 150–250 ms transitions; orange only for primary action, selection, unread, focus, errors). Nav rail (labelled at ≥1024px, icons at 640–1023px, bottom tab bar below 640px); every section is header → filter tabs and search → dense hairline list → record panel (right side at ≥1024px, full-screen route below). Admin forms are validated with Pydantic v2 models.
 
 ## 6. Flows
 
@@ -296,7 +314,9 @@ Each phase ends in a working, deployable state.
 0. **Scaffold**: uv project, config, db, Alembic, compose, Dockerfile, `/healthz`, `CLAUDE.md`, `README.md`.
 1. **Public port**: split `index.html`, `legal.html`, `404.html` into Jinja templates with markup unchanged; Tailwind build; `site_settings`, `legal_pages`, `projects` models and seed; `/app-ads.txt`, robots, sitemap. Visual parity check.
 2. **Inquiries**: model, form endpoint, validation, honeypot, rate limit, SMTP notification.
-3. **Admin**: auth and CLI commands; impeccable design pass for the admin shell and components; then inbox, legal (with preview), projects, settings, assets with slots.
+3. **Admin**, delivered in two plans:
+   - **3a**: auth, CSRF and CLI commands; the admin shell and component macros; overview; the inquiry pipeline (stages, timeline, notes, archive, resend).
+   - **3b**: legal editor with preview, projects, site settings, S3 assets with slots (MinIO in dev compose).
 4. **Cutover**: deploy on Coolify, point DNS at the VPS, remove the old static HTML files and `CNAME`, disable GitHub Pages.
 
 ## 12. Documentation
@@ -306,4 +326,4 @@ Each phase ends in a working, deployable state.
 
 ## 13. Out of scope
 
-Analytics, multi-language content, legal page revision history, admin roles, user management UI, email password reset, and editing the Services, Process and FAQ sections (they stay in the template). Add any of these as separate changes when needed.
+Analytics, pipeline reporting and quoted amounts, multi-language content, legal page revision history, admin roles, user management UI, email password reset, and editing the Services, Process and FAQ sections (they stay in the template). Add any of these as separate changes when needed.
