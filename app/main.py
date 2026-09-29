@@ -72,8 +72,30 @@ async def not_authenticated(request: Request, exc: NotAuthenticated):
     return RedirectResponse(login, status_code=303)
 
 
+ADMIN_ERRORS = {
+    404: (
+        "Not found",
+        "That page or record does not exist. It may have been deleted.",
+        "ph-magnifying-glass",
+    ),
+    500: (
+        "Something went wrong",
+        "The error has been logged. Try again in a minute.",
+        "ph-warning-circle",
+    ),
+}
+
+
+def _admin_error(request: Request, status_code: int):
+    heading, body, icon = ADMIN_ERRORS[status_code]
+    context = {"heading": heading, "body": body, "icon": icon}
+    return templates.TemplateResponse(request, "admin/error.html", context, status_code=status_code)
+
+
 @app.exception_handler(StarletteHTTPException)
 async def http_error(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404 and request.url.path.startswith("/admin"):
+        return _admin_error(request, 404)
     if exc.status_code == 404:
         return templates.TemplateResponse(request, "public/404.html", status_code=404)
     return await http_exception_handler(request, exc)
@@ -82,6 +104,8 @@ async def http_error(request: Request, exc: StarletteHTTPException):
 @app.exception_handler(Exception)
 async def server_error(request: Request, exc: Exception):
     logger.exception("Unhandled error on %s", request.url.path, exc_info=exc)
+    if request.url.path.startswith("/admin"):
+        return _admin_error(request, 500)
     return templates.TemplateResponse(request, "public/500.html", status_code=500)
 
 

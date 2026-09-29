@@ -49,3 +49,27 @@ async def test_admin_does_not_swap_error_pages(admin_client):
     t = (await admin_client.get("/admin")).text
     assert '<meta name="htmx-config"' in t
     assert '"noSwap":[204,304,403,404,"5xx"]' in t
+
+
+async def test_nav_lists_every_section(admin_client):
+    t = (await admin_client.get("/admin")).text
+    for href in (
+        "/admin/inquiries",
+        "/admin/legal",
+        "/admin/projects",
+        "/admin/settings",
+        "/admin/assets",
+    ):
+        assert f'href="{href}"' in t
+
+
+async def test_admin_404_uses_admin_error_page(admin_client):
+    r = await admin_client.get("/admin/legal/999999")
+    assert r.status_code == 404
+    assert "Back to the admin" in r.text
+    assert "Everything we do is on the home page" not in r.text
+
+
+async def test_public_404_unchanged(client):
+    r = await client.get("/no-such-page")
+    assert "Everything we do is on the home page" in r.text

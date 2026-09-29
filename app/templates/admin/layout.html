@@ -15,6 +15,10 @@
       <ul class="flex flex-1 px-1 sm:flex-col sm:gap-1 sm:px-2" data-unread-count="{{ unread_count }}">
         {{ nav_item("/admin", "ph-squares-four", "Overview", section == "overview") }}
         {{ nav_item("/admin/inquiries", "ph-tray", "Inquiries", section == "inquiries", badge=unread_count) }}
+        {{ nav_item("/admin/legal", "ph-scroll", "Legal", section == "legal") }}
+        {{ nav_item("/admin/projects", "ph-app-window", "Projects", section == "projects") }}
+        {{ nav_item("/admin/settings", "ph-gear-six", "Settings", section == "settings") }}
+        {{ nav_item("/admin/assets", "ph-images", "Assets", section == "assets") }}
       </ul>
       <form method="post" action="/admin/logout" class="hidden p-2 sm:block">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
