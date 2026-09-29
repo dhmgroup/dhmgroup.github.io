@@ -9,7 +9,7 @@ from app.db import get_session
 from app.inquiries.models import Inquiry, InquiryStage
 from app.templating import templates
 
-router = APIRouter(prefix="/admin", dependencies=[Depends(verify_csrf), Depends(require_admin)])
+router = APIRouter(prefix="/admin", dependencies=[Depends(require_admin), Depends(verify_csrf)])
 
 
 @router.get("")

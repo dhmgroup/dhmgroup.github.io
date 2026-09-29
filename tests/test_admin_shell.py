@@ -43,3 +43,9 @@ def test_local_time_formats_in_lusaka():
         local_time(datetime(2026, 9, 29, 9, 30, tzinfo=UTC), "long", now=now)
         == "29 Sep 2026, 11:30"
     )
+
+
+async def test_admin_does_not_swap_error_pages(admin_client):
+    t = (await admin_client.get("/admin")).text
+    assert '<meta name="htmx-config"' in t
+    assert '"noSwap":[204,304,403,404,"5xx"]' in t

@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% from "admin/_macros.html" import nav_item %}
 {% block title %}{{ title }} | DHM admin{% endblock %}
-{% block meta %}<meta name="robots" content="noindex"><meta name="csrf-token" content="{{ csrf_token }}">{% endblock %}
+{% block meta %}<meta name="robots" content="noindex"><meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="htmx-config" content='{"noSwap":[204,304,403,404,"5xx"]}'>{% endblock %}
 {% block body_class %}min-h-dvh{% endblock %}
 {% block body %}
 <div class="flex min-h-dvh" hx-headers:inherited='{"X-CSRF-Token": "{{ csrf_token }}"}'>

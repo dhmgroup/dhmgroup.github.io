@@ -1,6 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.exception_handlers import http_exception_handler
@@ -13,7 +13,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.admin.routes import router as admin_router
-from app.auth.deps import NotAuthenticated
+from app.auth.deps import NotAuthenticated, safe_next
 from app.auth.routes import router as auth_router
 from app.config import settings
 from app.db import engine, get_session
@@ -53,7 +53,11 @@ app.include_router(inquiries_admin_router)
 
 @app.exception_handler(NotAuthenticated)
 async def not_authenticated(request: Request, exc: NotAuthenticated):
-    target = request.url.path + (f"?{request.url.query}" if request.url.query else "")
+    if request.method == "GET":
+        target = request.url.path + (f"?{request.url.query}" if request.url.query else "")
+    else:  # return to the page the action was taken on, not the POST endpoint
+        page = urlsplit(request.headers.get("HX-Current-URL", ""))
+        target = safe_next(page.path + (f"?{page.query}" if page.query else ""))
     login = f"/admin/login?next={quote(target, safe='/?=&')}"
     if is_htmx(request):
         return Response(status_code=204, headers={"HX-Redirect": login})

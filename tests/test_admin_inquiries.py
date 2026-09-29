@@ -229,3 +229,9 @@ async def test_two_admins_both_recorded(admin_client, session):
         f"/admin/inquiries/{inquiry.id}/notes", data={"body": "From first"}, headers=HX
     )
     assert "second@dhmgroup.net" in r.text and "admin@dhmgroup.net" in r.text
+
+
+async def test_reply_link_encodes_the_address(admin_client, session):
+    inquiry = await make_lead(session, email="x?bcc=spy%40evil.test&a=@gmail.com")
+    t = (await admin_client.get(f"/admin/inquiries/{inquiry.id}")).text
+    assert "mailto:x%3Fbcc%3Dspy%2540evil.test%26a%3D@gmail.com?subject=" in t

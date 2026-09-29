@@ -19,7 +19,7 @@ from app.inquiries.notify import notify_inquiry
 from app.templating import templates
 
 router = APIRouter(
-    prefix="/admin/inquiries", dependencies=[Depends(verify_csrf), Depends(require_admin)]
+    prefix="/admin/inquiries", dependencies=[Depends(require_admin), Depends(verify_csrf)]
 )
 PAGE_SIZE = 50
 TABS = [*STAGES, "archived"]
@@ -128,7 +128,7 @@ async def _get(session: AsyncSession, inquiry_id: int) -> Inquiry:
 
 
 def _panel_context(request: Request, inquiry: Inquiry, **extra) -> dict:
-    mailto = f"mailto:{inquiry.email}?subject={quote(REPLY_SUBJECT)}"
+    mailto = f"mailto:{quote(inquiry.email, safe='@')}?subject={quote(REPLY_SUBJECT)}"
     return {
         "inquiry": inquiry,
         "stages": STAGES,

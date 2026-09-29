@@ -83,7 +83,7 @@ uv run alembic check
 
 1. **Database.** In Coolify, add a PostgreSQL 17 resource. Copy its internal connection URL and change the scheme to `postgresql+asyncpg://`.
 2. **Application.** Add an application from this Git repository, branch `fullstack` until cutover (then `main`). Build pack: **Dockerfile**. Port: **8000**.
-3. **Environment.** Set `ENV=production`, `SECRET_KEY`, `DATABASE_URL`, `BASE_URL=https://dhmgroup.net` and the `SMTP_*` variables for the mail server that sends inquiry notifications.
+3. **Environment.** The image already runs with `ENV=production` and refuses to start without a real `SECRET_KEY`. Set `SECRET_KEY`, `DATABASE_URL`, `BASE_URL=https://dhmgroup.net` and the `SMTP_*` variables for the mail server that sends inquiry notifications.
 4. **Domain.** Assign `dhmgroup.net` (and `www.dhmgroup.net` if used). Coolify's proxy handles TLS.
 5. **Deploy.** Migrations run automatically on container start. After the first deploy, open the application terminal in Coolify and run `dhm seed`.
 6. **Health.** The container reports health from `/healthz`, which also checks the database.

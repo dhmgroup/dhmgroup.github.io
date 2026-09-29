@@ -141,3 +141,21 @@ async def test_successful_logins_do_not_use_up_the_limit(client, admin):
             "/admin/login", data={"email": "admin@dhmgroup.net", "password": "admin-password-1"}
         )
         assert r.status_code == 303
+
+
+async def test_htmx_post_without_session_redirects_to_sign_in(client, session):
+    r = await client.post(
+        "/admin/inquiries/1/stage",
+        data={"stage": "contacted"},
+        headers={"HX-Request": "true", "HX-Current-URL": "http://test/admin/inquiries/1?stage=new"},
+    )
+    assert r.status_code == 204
+    assert r.headers["HX-Redirect"] == "/admin/login?next=/admin/inquiries/1?stage=new"
+
+
+async def test_htmx_post_redirect_ignores_offsite_current_url(client):
+    r = await client.post(
+        "/admin/inquiries/1/stage",
+        headers={"HX-Request": "true", "HX-Current-URL": "https://evil.test/admin"},
+    )
+    assert r.headers["HX-Redirect"] == "/admin/login?next=/admin"
