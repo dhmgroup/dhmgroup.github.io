@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     base_url: str = "http://localhost:8000"
     secret_key: str = DEV_SECRET_KEY
     timezone: str = "Africa/Lusaka"
+    s3_endpoint_url: str = "http://localhost:9000"  # empty for AWS S3
+    s3_region: str = "us-east-1"
+    s3_bucket: str = "dhm-assets"
+    s3_access_key_id: str = "dhm"
+    s3_secret_access_key: str = "dhm-minio-secret"
+    s3_public_base_url: str = "http://localhost:9000/dhm-assets"
     smtp_host: str = "localhost"
     smtp_port: int = 1025
     smtp_username: str = ""

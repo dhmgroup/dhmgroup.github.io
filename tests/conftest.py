@@ -8,6 +8,8 @@ from pathlib import Path
 os.environ["DATABASE_URL"] = os.environ.get(
     "TEST_DATABASE_URL", "postgresql+asyncpg://dhm:dhm@localhost:5433/dhm_test"
 )
+os.environ["S3_BUCKET"] = os.environ.get("TEST_S3_BUCKET", "dhm-test")
+os.environ["S3_PUBLIC_BASE_URL"] = f"http://localhost:9000/{os.environ['S3_BUCKET']}"
 
 import pytest  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402

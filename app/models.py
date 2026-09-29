@@ -1,5 +1,6 @@
 """Import every model module so Base.metadata is complete (used by Alembic and tests)."""
 
+from app.assets import models as assets  # noqa: F401
 from app.auth import models as auth  # noqa: F401
 from app.inquiries import models as inquiries  # noqa: F401
 from app.legal import models as legal  # noqa: F401
