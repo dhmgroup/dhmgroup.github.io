@@ -1,0 +1,22 @@
+<section id="legal-list" class="min-w-0 flex-1 lg:max-w-sm lg:border-r lg:border-line"
+         hx-get="/admin/legal" hx-trigger="legal-changed from:document" hx-target="this" hx-swap="outerHTML">
+  <div class="flex min-h-16 items-center justify-between gap-4 border-b border-line px-4 sm:px-6">
+    <h1 class="text-xl font-semibold tracking-tight">Legal pages</h1>
+    <a href="/admin/legal/new" hx-get="/admin/legal/new" hx-target="#legal-editor" hx-swap="outerHTML" hx-push-url="true" class="btn btn-primary text-sm"><i class="ph ph-plus" aria-hidden="true"></i>New page</a>
+  </div>
+  <ul class="divide-y divide-line">
+    {% for p in pages %}
+    <li>
+      <a href="/admin/legal/{{ p.id }}" hx-get="/admin/legal/{{ p.id }}" hx-target="#legal-editor" hx-swap="outerHTML" hx-push-url="true"
+         data-record-id="{{ p.id }}" {% if page and page.id == p.id %}aria-current="true"{% endif %}
+         class="flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-panel aria-[current=true]:bg-raised sm:px-6">
+        <span class="min-w-0 flex-1">
+          <span class="block truncate font-medium">{{ p.title }}</span>
+          <span class="block truncate font-mono text-xs text-muted">/legal/{{ p.slug }}</span>
+        </span>
+        <span class="shrink-0 rounded-full border border-line bg-raised px-2 py-0.5 text-xs {% if not p.is_published %}text-muted{% endif %}">{{ "Published" if p.is_published else "Draft" }}</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>

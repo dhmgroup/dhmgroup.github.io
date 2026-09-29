@@ -34,7 +34,7 @@
     <li>
       <a href="/admin/inquiries/{{ i.id }}?stage={{ stage }}{% if q %}&amp;q={{ q | urlencode }}{% endif %}"
          hx-get="/admin/inquiries/{{ i.id }}" hx-target="#inquiry-panel" hx-swap="outerHTML" hx-push-url="true"
-         data-inquiry-id="{{ i.id }}" {% if inquiry is defined and inquiry and inquiry.id == i.id %}aria-current="true"{% endif %}
+         data-record-id="{{ i.id }}" {% if inquiry is defined and inquiry and inquiry.id == i.id %}aria-current="true"{% endif %}
          class="flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-panel aria-[current=true]:bg-raised sm:px-6">
         {{ unread_dot(i) }}
         <span class="min-w-0 flex-1">

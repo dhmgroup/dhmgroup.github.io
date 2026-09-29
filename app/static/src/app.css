@@ -46,6 +46,14 @@
   & ol { @apply flex list-decimal flex-col gap-2 pl-6; }
   & a { @apply text-white underline decoration-line underline-offset-4 transition-all duration-700 ease-fluid hover:decoration-brand; }
   & strong { @apply font-semibold text-white; }
+  & h1 { @apply mt-6 text-2xl font-semibold tracking-tight text-white; }
+  & h4, & h5, & h6 { @apply mt-4 font-semibold text-white; }
+  & blockquote { @apply border-l border-line pl-4 text-muted; }
+  & code { @apply rounded bg-raised px-1 font-mono text-sm text-white; }
+  & pre { @apply overflow-x-auto rounded-xl bg-panel p-4; }
+  & table { @apply w-full border-collapse text-left text-sm; }
+  & th, & td { @apply border-b border-line py-2 pr-4; }
+  & hr { @apply border-line; }
 }
 
 /* Scroll interpolation. Content stays visible without JS or with reduced motion. */

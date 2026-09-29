@@ -19,11 +19,11 @@ document.addEventListener('htmx:response:error', e => {
   else if (status >= 500) toast('Something went wrong on our side. Try again in a minute.');
 });
 
-// Mark the open lead's row in the list: after panel swaps, list refreshes and on first load.
+// Mark the open record's row in a list (inquiries, legal, projects): after swaps and on load.
 const markCurrentRow = () => {
-  const id = location.pathname.match(/^\/admin\/inquiries\/(\d+)/)?.[1];
-  document.querySelectorAll('#inquiry-list a[data-inquiry-id]').forEach(a => {
-    if (a.dataset.inquiryId === id) a.setAttribute('aria-current', 'true');
+  const id = location.pathname.match(/^\/admin\/[a-z]+\/(\d+)/)?.[1];
+  document.querySelectorAll('a[data-record-id]').forEach(a => {
+    if (a.dataset.recordId === id) a.setAttribute('aria-current', 'true');
     else a.removeAttribute('aria-current');
   });
 };

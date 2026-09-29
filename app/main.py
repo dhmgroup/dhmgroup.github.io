@@ -21,6 +21,7 @@ from app.db import engine, get_session
 from app.htmx import is_htmx
 from app.inquiries.admin import router as inquiries_admin_router
 from app.inquiries.routes import router as inquiries_router
+from app.legal.admin import router as legal_admin_router
 from app.legal.routes import router as legal_router
 from app.public.routes import router as public_router
 from app.site.admin import router as settings_admin_router
@@ -53,6 +54,7 @@ app.include_router(admin_router)
 app.include_router(inquiries_admin_router)
 app.include_router(assets_admin_router)
 app.include_router(settings_admin_router)
+app.include_router(legal_admin_router)
 
 
 @app.exception_handler(NotAuthenticated)

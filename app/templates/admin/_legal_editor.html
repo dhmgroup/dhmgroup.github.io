@@ -1,0 +1,50 @@
+{% from "admin/_macros.html" import text_field, switch %}
+{% macro val(name) %}{% set x = values[name] if name in values else page[name] %}{{ x if x is not none }}{% endmacro %}
+{% if page %}
+<section id="legal-editor" class="fixed inset-0 z-30 flex flex-col overflow-y-auto bg-black pb-20 sm:left-16 sm:pb-0 lg:static lg:z-auto lg:flex-1" aria-labelledby="legal-editor-title">
+  <header class="flex min-h-16 items-center gap-3 border-b border-line px-4 sm:px-6">
+    <a href="/admin/legal" class="-ml-2 rounded-lg p-2 text-muted transition-colors duration-200 hover:text-white lg:hidden" aria-label="Back to legal pages"><i class="ph ph-arrow-left text-xl" aria-hidden="true"></i></a>
+    <h2 id="legal-editor-title" class="min-w-0 flex-1 truncate text-xl font-semibold tracking-tight" tabindex="-1" data-autofocus>{{ page.title or "New page" }}</h2>
+    {% if page.id and page.is_published %}<a href="/legal/{{ page.slug }}" target="_blank" rel="noopener" class="btn btn-ghost text-sm"><i class="ph ph-arrow-square-out" aria-hidden="true"></i>View</a>{% endif %}
+  </header>
+  <form method="post" action="/admin/legal{% if page.id %}/{{ page.id }}{% endif %}"
+        hx-post="/admin/legal{% if page.id %}/{{ page.id }}{% endif %}" hx-target="#legal-editor" hx-swap="outerHTML"
+        class="flex flex-col gap-4 px-4 py-6 sm:px-6">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="grid gap-4 sm:grid-cols-[1fr_12rem_6rem]">
+      {{ text_field("title", "Title", val("title"), errors.title, required=True, maxlength=200) }}
+      {{ text_field("slug", "Address", val("slug"), errors.slug, hint="dhmgroup.net/legal/…", mono=True, required=True, maxlength=64) }}
+      {{ text_field("sort_order", "Order", val("sort_order"), errors.sort_order, type="number", mono=True) }}
+    </div>
+    {{ switch("is_published", "Published on dhmgroup.net", (values.is_published == "true") if values else page.is_published) }}
+    <div class="grid gap-4 xl:grid-cols-2">
+      <label class="flex flex-col gap-2 text-sm font-medium">
+        Content
+        <span class="text-xs font-normal text-muted">Markdown: <span class="font-mono">## Heading</span>, <span class="font-mono">**bold**</span>, <span class="font-mono">- list item</span>, <span class="font-mono">[link](https://…)</span></span>
+        <textarea name="body_md" rows="18" maxlength="50000"
+                  {% if errors.body_md %}aria-invalid="true"{% endif %}
+                  class="field resize-y font-mono text-sm{% if errors.body_md %} !border-brand{% endif %}"
+                  hx-post="/admin/legal/preview" hx-trigger="input changed delay:400ms" hx-target="#legal-preview" hx-swap="innerHTML">{{ val("body_md") }}</textarea>
+        {% if errors.body_md %}<span class="text-sm font-normal text-brand" role="alert">{{ errors.body_md }}</span>{% endif %}
+      </label>
+      <div class="flex flex-col gap-2 text-sm font-medium">
+        Preview
+        <div id="legal-preview" aria-live="polite" class="legal-prose flex min-h-40 flex-col gap-4 rounded-xl border border-line p-4 font-normal text-neutral-300">{{ (values.body_md if "body_md" in values else page.body_md) | markdown }}</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button type="submit" class="btn btn-primary text-sm">{{ "Save page" if page.id else "Create page" }}</button>
+      {% if errors %}<p class="text-sm text-brand" role="alert">Fix the highlighted fields.</p>{% endif %}
+    </div>
+  </form>
+  {% if page.id %}
+  <form method="post" action="/admin/legal/{{ page.id }}/delete" hx-post="/admin/legal/{{ page.id }}/delete" hx-target="#legal-editor" hx-swap="outerHTML"
+        hx-confirm="Delete “{{ page.title }}”? Links to /legal/{{ page.slug }} will stop working." class="border-t border-line px-4 py-6 sm:px-6">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="btn btn-ghost text-sm"><i class="ph ph-trash" aria-hidden="true"></i>Delete page</button>
+  </form>
+  {% endif %}
+</section>
+{% else %}
+<section id="legal-editor" class="hidden flex-1 items-center justify-center text-sm text-muted lg:flex">Choose a page to edit, or create a new one.</section>
+{% endif %}
