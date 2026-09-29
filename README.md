@@ -17,7 +17,7 @@ Requirements: [uv](https://docs.astral.sh/uv/) and Docker.
 ```bash
 cp .env.example .env
 uv sync
-docker compose up -d --wait db     # Postgres on localhost:5433
+docker compose up -d --wait        # Postgres on :5433, Mailpit on :1025 (UI http://localhost:8025)
 uv run alembic upgrade head
 uv run dhm seed
 uv run dhm dev
@@ -34,8 +34,14 @@ Settings come from environment variables (or `.env` locally).
 | `ENV` | `development` | `production` enables secure cookies (Phase 3) |
 | `DATABASE_URL` | `postgresql+asyncpg://dhm:dhm@localhost:5433/dhm` | Postgres connection; must use the `asyncpg` driver |
 | `BASE_URL` | `http://localhost:8000` | Canonical URL for the sitemap and Open Graph tags |
+| `SMTP_HOST` | `localhost` | Mail server for inquiry notifications |
+| `SMTP_PORT` | `1025` | 587 for STARTTLS, 465 for implicit TLS |
+| `SMTP_USERNAME`, `SMTP_PASSWORD` | empty | Leave empty for servers without auth (Mailpit) |
+| `SMTP_TLS` | `false` | `true` for implicit TLS (port 465) |
+| `SMTP_STARTTLS` | `false` | `true` for STARTTLS (port 587) |
+| `SMTP_FROM` | `DHM Group <no-reply@dhmgroup.net>` | Sender of notification emails |
 
-SMTP (Phase 2) and S3 and session secrets (Phase 3) are documented here as those phases land.
+S3 and session secrets (Phase 3) are documented here when that phase lands.
 
 ## Database changes
 
@@ -62,7 +68,7 @@ uv run alembic check
 
 1. **Database.** In Coolify, add a PostgreSQL 17 resource. Copy its internal connection URL and change the scheme to `postgresql+asyncpg://`.
 2. **Application.** Add an application from this Git repository, branch `fullstack` until cutover (then `main`). Build pack: **Dockerfile**. Port: **8000**.
-3. **Environment.** Set `ENV=production`, `DATABASE_URL` and `BASE_URL=https://dhmgroup.net`.
+3. **Environment.** Set `ENV=production`, `DATABASE_URL`, `BASE_URL=https://dhmgroup.net` and the `SMTP_*` variables for the mail server that sends inquiry notifications.
 4. **Domain.** Assign `dhmgroup.net` (and `www.dhmgroup.net` if used). Coolify's proxy handles TLS.
 5. **Deploy.** Migrations run automatically on container start. After the first deploy, open the application terminal in Coolify and run `dhm seed`.
 6. **Health.** The container reports health from `/healthz`, which also checks the database.

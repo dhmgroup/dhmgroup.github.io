@@ -1,5 +1,4 @@
 // Behaviour for the public landing page. Store links, contact details and the year are rendered by the server.
-const CONFIG = { contactEmail: document.getElementById('quote-form')?.dataset.contactEmail || '', formEndpoint: '' };
 
 // Mobile menu
 const btn = document.getElementById('menu-btn'), menu = document.getElementById('menu');
@@ -49,65 +48,16 @@ const paint = () => {
 addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(paint); } }, { passive: true });
 paint();
 
-// Quote form
-const form = document.getElementById('quote-form');
-if (!CONFIG.formEndpoint && !CONFIG.contactEmail) {
-  form.insertAdjacentHTML('afterbegin', '<p class="rounded-xl border border-line px-3 py-3 text-sm text-muted">Online quote requests open soon.</p>');
-  form.querySelectorAll('input, textarea, button').forEach(el => el.disabled = true);
-  form.querySelector('[type=submit]').classList.replace('disabled:animate-pulse', 'disabled:opacity-50');
-}
-const showErr = (input, msg) => {
-  const el = input.closest('label').querySelector('.err');
-  el.textContent = msg; el.classList.toggle('hidden', !msg);
-  input.setAttribute('aria-invalid', !!msg);
-  input.classList.toggle('!border-brand', !!msg);
+// Quote form: htmx posts it and swaps the server-rendered form or confirmation into #quote-panel.
+const panel = document.getElementById('quote-panel');
+const showFormError = msg => {
+  const el = panel.querySelector('#form-error');
+  if (el) { el.textContent = msg; el.classList.remove('hidden'); }
 };
-const validate = input => {
-  const v = input.value.trim();
-  if (input.required && !v) return showErr(input, 'This field is required.'), false;
-  if (input.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return showErr(input, 'Enter an email like name@company.com.'), false;
-  return showErr(input, ''), true;
-};
-form.querySelectorAll('[required]').forEach(i => i.addEventListener('blur', () => validate(i)));
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  const fields = [...form.querySelectorAll('[required]')];
-  const ok = fields.map(validate).every(Boolean);
-  if (!ok) return fields.find(f => f.getAttribute('aria-invalid') === 'true').focus();
-
-  const data = new FormData(form);
-  const formErr = document.getElementById('form-error');
-  const submit = form.querySelector('[type=submit]');
-  formErr.classList.add('hidden');
-  submit.disabled = true; submit.firstChild.textContent = 'Sending your request ';
-  try {
-    const done = document.getElementById("form-done");
-    if (CONFIG.formEndpoint) {
-      const res = await fetch(CONFIG.formEndpoint, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
-      if (!res.ok) throw new Error();
-      done.querySelector('[data-done-name]').textContent = data.get('name').trim().split(' ')[0];
-      done.querySelector('[data-done-email]').textContent = data.get('email');
-    } else if (CONFIG.contactEmail) {
-      const body = [...data].map(([k, v]) => `${k}: ${v}`).join('\n');
-      done.querySelector("h3").textContent = "Almost there. Send the email.";
-      done.querySelector("p").textContent = `Your email app has opened with your request addressed to ${CONFIG.contactEmail}. Press send and we will reply with next steps.`;
-      location.href = `mailto:${CONFIG.contactEmail}?subject=${encodeURIComponent('Quote request from ' + data.get('name'))}&body=${encodeURIComponent(body)}`;
-    } else throw new Error('unconfigured');
-    form.classList.add('hidden');
-    done.classList.replace('hidden', 'flex'); done.focus();
-  } catch (err) {
-    formErr.textContent = err.message === 'unconfigured'
-      ? 'Online quote requests are not available yet. Please try again soon.'
-      : 'We could not send your request. Check your connection and try again.';
-    formErr.classList.remove('hidden');
-  } finally {
-    submit.disabled = false; submit.firstChild.textContent = 'Request a quote ';
-  }
+panel.addEventListener('htmx:after:settle', () => {
+  (panel.querySelector('#form-done') || panel.querySelector('[aria-invalid="true"]'))?.focus();
 });
-
-// FAQ schema for search and answer engines, built from the visible FAQ
-const faq = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [...document.querySelectorAll('#faq-list details')].map(d => ({
-  '@type': 'Question', name: d.querySelector('summary').textContent.trim(),
-  acceptedAnswer: { '@type': 'Answer', text: d.querySelector('p').textContent.trim() }
-})) };
-const ld = document.createElement('script'); ld.type = 'application/ld+json'; ld.textContent = JSON.stringify(faq); document.head.append(ld);
+panel.addEventListener('htmx:response:error', e => {
+  if (e.detail.ctx.response.status >= 500) showFormError('We could not send your request. Please try again in a minute.');
+});
+panel.addEventListener('htmx:error', () => showFormError('We could not send your request. Check your connection and try again.'));

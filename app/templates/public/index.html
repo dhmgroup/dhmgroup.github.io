@@ -10,6 +10,7 @@
     <meta property="og:image" content="{{ base_url }}/static/img/og.png">
     <meta name="twitter:card" content="summary_large_image">
     <script type="application/ld+json">{{ org_ld | tojson }}</script>
+    <script type="application/ld+json">{{ faq_ld | tojson }}</script>
 {% endblock %}
 {% block body %}
     <a href="#main"
@@ -308,41 +309,13 @@
         <div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1fr_1.6fr]">
           <h2 class="reveal text-4xl font-semibold tracking-tight">Questions we hear most</h2>
           <div id="faq-list" class="reveal [--d:120ms] flex flex-col gap-2">
+            {% for question, answer in faqs %}
             <details class="group rounded-2xl border border-line bg-panel transition-all duration-700 ease-fluid hover:border-white/20">
-              <summary class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl px-6 py-4 text-lg font-medium">How much does a website or app cost?<i class="faq-icon ph ph-plus shrink-0 text-muted transition-transform duration-700 ease-fluid"
+              <summary class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl px-6 py-4 text-lg font-medium">{{ question }}<i class="faq-icon ph ph-plus shrink-0 text-muted transition-transform duration-700 ease-fluid"
    aria-hidden="true"></i></summary>
-              <p class="px-6 pb-6 text-muted">Every project is priced on its scope: the number of pages or screens, the features, and anything it connects to. Send the quote form and we reply with a written quote before any work starts.</p>
+              <p class="px-6 pb-6 text-muted">{{ answer }}</p>
             </details>
-            <details class="group rounded-2xl border border-line bg-panel transition-all duration-700 ease-fluid hover:border-white/20">
-              <summary class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl px-6 py-4 text-lg font-medium">How long does a project take?<i class="faq-icon ph ph-plus shrink-0 text-muted transition-transform duration-700 ease-fluid"
-   aria-hidden="true"></i></summary>
-              <p class="px-6 pb-6 text-muted">It depends on scope. A company website moves much faster than an app with accounts and payments on two platforms. Your quote includes a timeline with clear milestones.</p>
-            </details>
-            <details class="group rounded-2xl border border-line bg-panel transition-all duration-700 ease-fluid hover:border-white/20">
-              <summary class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl px-6 py-4 text-lg font-medium">Do you build for both iOS and Android?<i class="faq-icon ph ph-plus shrink-0 text-muted transition-transform duration-700 ease-fluid"
-   aria-hidden="true"></i></summary>
-              <p class="px-6 pb-6 text-muted">Yes. Our own apps, Pepaala News and Nchito, are live on the App Store and Google Play, and we take client apps through the same store review process.</p>
-            </details>
-            <details class="group rounded-2xl border border-line bg-panel transition-all duration-700 ease-fluid hover:border-white/20">
-              <summary class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl px-6 py-4 text-lg font-medium">Can I get email on my own domain?<i class="faq-icon ph ph-plus shrink-0 text-muted transition-transform duration-700 ease-fluid"
-   aria-hidden="true"></i></summary>
-              <p class="px-6 pb-6 text-muted">Yes. We set up business email on your domain so your team sends from name@yourcompany instead of a free address, and we manage the mailboxes for you.</p>
-            </details>
-            <details class="group rounded-2xl border border-line bg-panel transition-all duration-700 ease-fluid hover:border-white/20">
-              <summary class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl px-6 py-4 text-lg font-medium">Do you work with small businesses?<i class="faq-icon ph ph-plus shrink-0 text-muted transition-transform duration-700 ease-fluid"
-   aria-hidden="true"></i></summary>
-              <p class="px-6 pb-6 text-muted">Yes. We work with sole traders, growing companies, startups and larger organisations. Tell us what you need and we will scope something that fits your budget.</p>
-            </details>
-            <details class="group rounded-2xl border border-line bg-panel transition-all duration-700 ease-fluid hover:border-white/20">
-              <summary class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl px-6 py-4 text-lg font-medium">What happens after launch?<i class="faq-icon ph ph-plus shrink-0 text-muted transition-transform duration-700 ease-fluid"
-   aria-hidden="true"></i></summary>
-              <p class="px-6 pb-6 text-muted">We can host, monitor and update your website or app, the same way we look after our own products. Ongoing support is agreed as part of your quote.</p>
-            </details>
-            <details class="group rounded-2xl border border-line bg-panel transition-all duration-700 ease-fluid hover:border-white/20">
-              <summary class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl px-6 py-4 text-lg font-medium">What should I prepare before asking for a quote?<i class="faq-icon ph ph-plus shrink-0 text-muted transition-transform duration-700 ease-fluid"
-   aria-hidden="true"></i></summary>
-              <p class="px-6 pb-6 text-muted">A short description of what you want, who it is for, and any deadline. Links to sites or apps you like help too. You do not need a technical specification.</p>
-            </details>
+            {% endfor %}
           </div>
         </div>
       </section>

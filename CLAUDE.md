@@ -19,8 +19,8 @@ Read before changing anything visible:
 |---|---|---|
 | 0 | Scaffold, Docker, docs | done |
 | 1 | Public site port (landing, legal, 404, app-ads.txt) | done |
-| 2 | Inquiries: form endpoint, validation, spam guards, SMTP | next |
-| 3 | Admin: auth, inbox, legal, projects, settings, assets | not started |
+| 2 | Inquiries: form endpoint, validation, spam guards, SMTP | done |
+| 3 | Admin: auth, inbox, legal, projects, settings, assets | next |
 | 4 | Cutover from GitHub Pages to Coolify | not started |
 
 Update this table in the commit that finishes a phase.
@@ -33,7 +33,7 @@ All Python tooling runs through uv.
 
 ```bash
 uv sync                                   # install deps (incl. dev group)
-docker compose up -d --wait db            # local Postgres on localhost:5433 (dhm and dhm_test)
+docker compose up -d --wait               # Postgres on localhost:5433 (dhm, dhm_test), Mailpit SMTP :1025 / UI :8025
 uv run alembic upgrade head               # apply migrations
 uv run dhm seed                           # insert default content (idempotent)
 uv run dhm dev                            # uvicorn --reload + Tailwind watch, http://localhost:8000
@@ -54,11 +54,14 @@ app/
   db.py           Base (naming convention, tz-aware datetimes), engine, get_session, utcnow
   models.py       imports every model module; Alembic and tests rely on it
   templating.py   the one Jinja2Templates instance, globals and filters
+  htmx.py         is_htmx(request)
+  ratelimit.py    in-memory RateLimiter
   cli.py          `dhm` command
   seed.py         default content
   site/           SiteSettings (single row): contact details, socials, get_site_settings
   legal/          LegalPage, Markdown rendering, public routes
   projects/       Project ("Our apps" panels)
+  inquiries/      Inquiry, quote form validation, email notification, POST /inquiries
   public/         landing page, robots.txt, sitemap.xml, app-ads.txt
   templates/      base.html, public/, admin/ (Phase 3)
   static/         src/app.css (Tailwind entry), dist/ (built, gitignored), img/, js/, vendor/
@@ -91,3 +94,4 @@ New feature = new package under `app/` with `models.py` and `routes.py`; add its
 - `.env` is for local dev only. In production every setting comes from Coolify env vars.
 - htmx 4 (npm tag `next`) is not htmx 2. Most examples online are htmx 2; check the htmx 4 docs and the vendored source.
 - ruff excludes `docs/` (it would otherwise reformat code blocks in the plans).
+- On Windows a running `uv run dhm dev` locks `.venv/Scripts/dhm.exe`, so `uv sync`/`uv add` fail with "Access is denied". Stop the dev server first, or use `uv add --no-sync` and `uv run --no-sync`.

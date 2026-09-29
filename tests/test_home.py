@@ -111,3 +111,10 @@ async def test_sent_flag_shows_confirmation(client):
     assert 'id="form-done"' in t
     assert "Request received." in t
     assert 'id="quote-form"' not in t
+
+
+async def test_faq_is_rendered_with_server_side_schema(client):
+    t = (await client.get("/")).text
+    assert t.count("<details ") == 7
+    assert "FAQPage" in t
+    assert "How much does a website or app cost?" in t
