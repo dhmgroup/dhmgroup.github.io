@@ -1,5 +1,6 @@
 import asyncio
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -14,6 +15,8 @@ from sqlalchemy import text  # noqa: E402
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine  # noqa: E402
 from sqlalchemy.pool import NullPool  # noqa: E402
 
+from app.auth.routes import login_limiter  # noqa: E402
+from app.auth.users import create_admin  # noqa: E402
 from app.db import get_session  # noqa: E402
 from app.inquiries.routes import quote_limiter  # noqa: E402
 from app.main import app  # noqa: E402
@@ -72,3 +75,21 @@ async def client(session):
 @pytest.fixture(autouse=True)
 def _reset_rate_limits():
     quote_limiter.clear()
+    login_limiter.clear()
+
+
+@pytest.fixture
+async def admin(session):
+    return await create_admin(session, "admin@dhmgroup.net", "admin-password-1")
+
+
+@pytest.fixture
+async def admin_client(client, admin):
+    r = await client.post(
+        "/admin/login", data={"email": "admin@dhmgroup.net", "password": "admin-password-1"}
+    )
+    assert r.status_code == 303, r.text
+    page = await client.get("/admin/login")  # renders the session's CSRF token in a meta tag
+    token = re.search(r'name="csrf-token" content="([^"]+)"', page.text).group(1)
+    client.headers["X-CSRF-Token"] = token
+    return client

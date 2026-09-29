@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Sign in | DHM admin{% endblock %}
+{% block meta %}<meta name="robots" content="noindex"><meta name="csrf-token" content="{{ csrf_token }}">{% endblock %}
+{% block body_class %}grid min-h-dvh place-items-center px-4{% endblock %}
+{% block body %}
+  <main class="flex w-full max-w-sm flex-col gap-8">
+    <img src="/static/img/logo-light.png" alt="DHM Group" width="640" height="314" class="h-8 w-auto self-start">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-2xl font-semibold tracking-tight">Sign in</h1>
+      <p class="text-sm text-muted">Admin access for the DHM Group team.</p>
+    </div>
+    <form method="post" action="/admin/login" class="flex flex-col gap-4">
+      <input type="hidden" name="next" value="{{ next }}">
+      <label class="flex flex-col gap-2 text-sm font-medium">
+        Email
+        <input name="email" type="email" autocomplete="username" required value="{{ email }}" class="field" autofocus>
+      </label>
+      <label class="flex flex-col gap-2 text-sm font-medium">
+        Password
+        <input name="password" type="password" autocomplete="current-password" required class="field">
+      </label>
+      {% if error %}
+      <p class="rounded-xl border border-brand/60 px-3 py-3 text-sm" role="alert">{{ error }}</p>
+      {% endif %}
+      <button type="submit" class="btn btn-primary mt-2 self-start">Sign in <i class="ph ph-arrow-right" aria-hidden="true"></i></button>
+    </form>
+  </main>
+{% endblock %}

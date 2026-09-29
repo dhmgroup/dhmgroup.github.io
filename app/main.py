@@ -1,16 +1,22 @@
 import logging
 from contextlib import asynccontextmanager
+from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.exception_handlers import http_exception_handler
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.sessions import SessionMiddleware
 
+from app.auth.deps import NotAuthenticated
+from app.auth.routes import router as auth_router
+from app.config import settings
 from app.db import engine, get_session
+from app.htmx import is_htmx
 from app.inquiries.routes import router as inquiries_router
 from app.legal.routes import router as legal_router
 from app.public.routes import router as public_router
@@ -26,10 +32,28 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.secret_key,
+    session_cookie="dhm_admin",
+    max_age=8 * 60 * 60,
+    same_site="lax",
+    https_only=settings.env == "production",
+)
 app.mount("/static", StaticFiles(directory=APP_DIR / "static"), name="static")
 app.include_router(legal_router)
 app.include_router(public_router)
 app.include_router(inquiries_router)
+app.include_router(auth_router)
+
+
+@app.exception_handler(NotAuthenticated)
+async def not_authenticated(request: Request, exc: NotAuthenticated):
+    target = request.url.path + (f"?{request.url.query}" if request.url.query else "")
+    login = f"/admin/login?next={quote(target, safe='/?=&')}"
+    if is_htmx(request):
+        return Response(status_code=204, headers={"HX-Redirect": login})
+    return RedirectResponse(login, status_code=303)
 
 
 @app.exception_handler(StarletteHTTPException)
