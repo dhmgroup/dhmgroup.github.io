@@ -1,14 +1,20 @@
-"""Quote form parsing and validation.
+"""Quote form parsing and validation with Pydantic v2.
 
-A plain dataclass rather than a Pydantic model: the error messages are user-facing copy
-keyed by field, which is simpler to express directly than to map from Pydantic errors.
+`QuoteForm` normalises raw form input and never fails, so the page can always re-render what
+the visitor typed. `QuoteRules` holds the constraints; `QuoteForm.errors()` runs it and maps
+Pydantic's error types to the user-facing messages shown under each field.
 """
 
-import re
-from dataclasses import dataclass, field
+from typing import Annotated, Literal, get_args
 
-SERVICES = ("Website", "Mobile app", "Email hosting", "Not sure yet")
-EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
+from pydantic import BaseModel, BeforeValidator, Field, ValidationError
+
+Service = Literal["Website", "Mobile app", "Email hosting", "Not sure yet"]
+SERVICES: tuple[str, ...] = get_args(Service)
+
+# Printable ASCII without spaces or a second "@": the notification's Reply-To header cannot
+# encode an internationalised address.
+EMAIL_PATTERN = r"^[!-?A-~]+@[!-?A-~]+\.[!-?A-~]{2,}$"
 REQUIRED = "This field is required."
 
 
@@ -17,46 +23,63 @@ def _one_line(value: object) -> str:
     return " ".join(str(value or "").split())
 
 
-@dataclass
-class QuoteForm:
-    name: str = ""
-    email: str = ""
-    company: str = ""
-    services: list[str] = field(default_factory=list)
-    message: str = ""
-    website: str = ""  # honeypot: humans never see or fill it
+OneLine = Annotated[str, BeforeValidator(_one_line)]
+
+
+class QuoteRules(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    email: str = Field(min_length=1, max_length=254, pattern=EMAIL_PATTERN)
+    company: str = Field(max_length=160)
+    services: list[Service]
+    message: str = Field(min_length=1, max_length=5000)
+
+
+# (field, pydantic error type) -> message; a None type is the field's fallback.
+MESSAGES = {
+    ("name", "string_too_short"): REQUIRED,
+    ("name", None): "Keep your name under 120 characters.",
+    ("email", "string_too_short"): REQUIRED,
+    ("email", None): "Enter an email like name@company.com.",
+    ("message", "string_too_short"): REQUIRED,
+    ("message", None): "Keep the project details under 5,000 characters.",
+    ("company", None): "Keep the company name under 160 characters.",
+    ("services", None): "Choose what you need from the listed services.",
+}
+FORM_LEVEL = {"company", "services"}  # shown in the form-wide error box, not under a field
+
+
+class QuoteForm(BaseModel):
+    name: OneLine = ""
+    email: OneLine = ""
+    company: OneLine = ""
+    services: list[str] = []
+    message: Annotated[str, BeforeValidator(lambda v: str(v or "").strip())] = ""
+    website: OneLine = ""  # honeypot: humans never see or fill it
 
     @classmethod
     def from_form(cls, form) -> "QuoteForm":
-        return cls(
-            name=_one_line(form.get("name")),
-            email=_one_line(form.get("email")),
-            company=_one_line(form.get("company")),
-            services=list(dict.fromkeys(str(s) for s in form.getlist("service"))),
-            message=str(form.get("message") or "").strip(),
-            website=_one_line(form.get("website")),
+        return cls.model_validate(
+            {
+                "name": form.get("name"),
+                "email": form.get("email"),
+                "company": form.get("company"),
+                "services": list(dict.fromkeys(str(s) for s in form.getlist("service"))),
+                "message": form.get("message"),
+                "website": form.get("website"),
+            }
         )
 
     def errors(self) -> dict[str, str]:
-        errors: dict[str, str] = {}
-        if not self.name:
-            errors["name"] = REQUIRED
-        elif len(self.name) > 120:
-            errors["name"] = "Keep your name under 120 characters."
-        if not self.email:
-            errors["email"] = REQUIRED
-        # ASCII only: the notification's Reply-To header cannot encode an internationalised address.
-        elif len(self.email) > 254 or not self.email.isascii() or not EMAIL_RE.match(self.email):
-            errors["email"] = "Enter an email like name@company.com."
-        if not self.message:
-            errors["message"] = REQUIRED
-        elif len(self.message) > 5000:
-            errors["message"] = "Keep the project details under 5,000 characters."
-        if len(self.company) > 160:
-            errors["form"] = "Keep the company name under 160 characters."
-        elif any(s not in SERVICES for s in self.services):
-            errors["form"] = "Choose what you need from the listed services."
-        return errors
+        try:
+            QuoteRules.model_validate(self.model_dump(exclude={"website"}))
+        except ValidationError as exc:
+            errors: dict[str, str] = {}
+            for error in exc.errors():
+                field = str(error["loc"][0])
+                message = MESSAGES.get((field, error["type"])) or MESSAGES[(field, None)]
+                errors.setdefault("form" if field in FORM_LEVEL else field, message)
+            return errors
+        return {}
 
     @property
     def first_name(self) -> str:

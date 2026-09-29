@@ -73,3 +73,8 @@ def test_non_ascii_email_rejected():
     assert parse(**{**VALID, "email": "jos\u00e9@ex\u00e4mple.zm"}).errors() == {
         "email": "Enter an email like name@company.com."
     }
+
+
+def test_company_error_wins_over_service_error():
+    errors = parse(**VALID, company="x" * 161, service="Crypto").errors()
+    assert errors == {"form": "Keep the company name under 160 characters."}
