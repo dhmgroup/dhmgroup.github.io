@@ -13,12 +13,15 @@ RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev --no-ins
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev
 
-# Keep equal to TAILWIND_VERSION in app/cli.py.
+# Keep equal to TAILWIND_VERSION in app/cli.py. The hash is from the release's sha256sums.txt.
+# ponytail: linux-x64 binary only; add an arm64 hash + TARGETARCH switch if the VPS is ARM.
 ARG TAILWINDCSS_VERSION=v4.3.3
-RUN --mount=type=cache,target=/root/.cache/uv \
-    TAILWINDCSS_VERSION=${TAILWINDCSS_VERSION} \
-    uvx --from pytailwindcss==0.3.1 tailwindcss \
-      -i app/static/src/app.css -o app/static/dist/app.css --minify
+ARG TAILWINDCSS_SHA256=dc61b3ac6b8c9ca874c0cc4c57b2409791a64c5540404ca5f5367360babc313a
+RUN python -c "import sys, urllib.request; urllib.request.urlretrieve(sys.argv[1], '/tmp/tailwindcss')" \
+      "https://github.com/tailwindlabs/tailwindcss/releases/download/${TAILWINDCSS_VERSION}/tailwindcss-linux-x64" \
+ && echo "${TAILWINDCSS_SHA256}  /tmp/tailwindcss" | sha256sum -c - \
+ && chmod +x /tmp/tailwindcss \
+ && /tmp/tailwindcss -i app/static/src/app.css -o app/static/dist/app.css --minify
 
 FROM python:${PYTHON_VERSION}-slim
 RUN useradd --create-home --uid 1000 app

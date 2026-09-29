@@ -84,7 +84,7 @@ New feature = new package under `app/` with `models.py` and `routes.py`; add its
 
 ## Gotchas
 
-- The Tailwind version is pinned in two places: `TAILWIND_VERSION` in `app/cli.py` and `ARG TAILWINDCSS_VERSION` in `Dockerfile`.
+- The Tailwind version is pinned in two places: `TAILWIND_VERSION` in `app/cli.py` and `ARG TAILWINDCSS_VERSION` in `Dockerfile`. When bumping it, also update `ARG TAILWINDCSS_SHA256` from that release's `sha256sums.txt` (`tailwindcss-linux-x64`); the build fails on a mismatch.
 - Tailwind uses `source(none)` and only scans `app/templates` and `app/static/js`. Classes built in Python strings will not be generated; keep class names literal in templates or JS.
 - Tests use `raise_app_exceptions=False`, so an unexpected exception shows up as a 500 response. Read the logged traceback.
 - The dev database listens on host port 5433 (5432 is often taken by other local Postgres containers).
