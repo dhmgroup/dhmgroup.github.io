@@ -1,0 +1,96 @@
+<section id="inquiry-panel"
+         class="fixed inset-0 z-30 flex flex-col overflow-y-auto bg-black pb-20 sm:left-16 sm:pb-0 lg:static lg:z-auto lg:flex-1"
+         aria-labelledby="inquiry-name">
+  <header class="flex min-h-16 items-center gap-3 border-b border-line px-4 sm:px-6">
+    <a href="/admin/inquiries?stage={{ 'archived' if inquiry.archived else inquiry.stage.value }}" class="-ml-2 rounded-lg p-2 text-muted transition-colors duration-200 hover:text-white lg:hidden" aria-label="Back to inquiries">
+      <i class="ph ph-arrow-left text-xl" aria-hidden="true"></i>
+    </a>
+    <div class="min-w-0 flex-1">
+      <h2 id="inquiry-name" class="truncate text-xl font-semibold tracking-tight" tabindex="-1" data-autofocus>{{ inquiry.name }}</h2>
+      <p class="truncate text-sm text-muted">{% if inquiry.company %}{{ inquiry.company }} · {% endif %}<span class="font-mono">{{ inquiry.email }}</span></p>
+    </div>
+    <span class="hidden shrink-0 font-mono text-xs text-muted sm:block">{{ inquiry.created_at | local_time("long") }}</span>
+  </header>
+
+  <div class="flex flex-wrap items-center gap-2 border-b border-line px-4 py-4 sm:px-6">
+    <a href="{{ mailto }}" class="btn btn-primary text-sm"><i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>Reply by email</a>
+    <form hx-post="/admin/inquiries/{{ inquiry.id }}/archive" hx-target="#inquiry-panel" hx-swap="outerHTML"
+          method="post" action="/admin/inquiries/{{ inquiry.id }}/archive">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="archived" value="{{ 'false' if inquiry.archived else 'true' }}">
+      <button type="submit" class="btn btn-ghost text-sm">
+        <i class="ph {{ 'ph-arrow-counter-clockwise' if inquiry.archived else 'ph-archive' }}" aria-hidden="true"></i>{{ "Restore" if inquiry.archived else "Archive" }}
+      </button>
+    </form>
+  </div>
+
+  <form class="border-b border-line px-4 py-4 sm:px-6" hx-post="/admin/inquiries/{{ inquiry.id }}/stage" hx-trigger="change"
+        hx-target="#inquiry-panel" hx-swap="outerHTML" method="post" action="/admin/inquiries/{{ inquiry.id }}/stage">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <fieldset>
+      <legend class="mb-2 text-sm font-medium text-muted">Stage</legend>
+      <div class="flex flex-wrap gap-2">
+        {% for value, (label, icon) in stages.items() %}
+        <label class="cursor-pointer">
+          <input type="radio" name="stage" value="{{ value }}" class="peer sr-only" {% if inquiry.stage == value %}checked{% endif %}>
+          <span class="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-sm transition-colors duration-200 hover:border-white/40 peer-checked:border-brand peer-checked:bg-brand peer-checked:text-black peer-focus-visible:outline-2 peer-focus-visible:outline-brand">
+            <i class="ph {{ icon }}" aria-hidden="true"></i>{{ label }}
+          </span>
+        </label>
+        {% endfor %}
+      </div>
+      <noscript><button type="submit" class="btn btn-ghost mt-3 text-sm">Save stage</button></noscript>
+    </fieldset>
+  </form>
+
+  {% if not inquiry.notified_at %}
+  <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-3 text-sm sm:px-6" role="status">
+    <span class="flex items-center gap-2"><i class="ph ph-warning-circle text-brand" aria-hidden="true"></i>The notification email for this lead was not sent.</span>
+    <form hx-post="/admin/inquiries/{{ inquiry.id }}/resend" hx-target="#inquiry-panel" hx-swap="outerHTML" hx-disable="find button"
+          method="post" action="/admin/inquiries/{{ inquiry.id }}/resend">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="btn btn-ghost text-sm">Resend</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <div class="flex flex-col gap-4 border-b border-line px-4 py-6 sm:px-6">
+    {% if inquiry.services %}
+    <ul class="flex flex-wrap gap-2" aria-label="Services requested">
+      {% for s in inquiry.services %}<li class="rounded-full border border-line bg-raised px-2 py-0.5 text-xs">{{ s }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    <p class="max-w-prose whitespace-pre-line">{{ inquiry.message }}</p>
+  </div>
+
+  <div class="flex flex-col gap-4 px-4 py-6 sm:px-6">
+    <h3 class="text-sm font-medium text-muted">Activity</h3>
+    <form hx-post="/admin/inquiries/{{ inquiry.id }}/notes" hx-target="#inquiry-panel" hx-swap="outerHTML" hx-disable="find button"
+          method="post" action="/admin/inquiries/{{ inquiry.id }}/notes" class="flex flex-col gap-2">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label class="sr-only" for="note-body">Add a note</label>
+      <textarea id="note-body" name="body" rows="2" maxlength="5000" placeholder="Add a note: a call, a quote sent, a follow-up date"
+                class="field resize-y text-sm{% if note_error %} !border-brand{% endif %}" {% if note_error %}aria-invalid="true" data-autofocus{% endif %}></textarea>
+      {% if note_error %}<span class="text-sm text-brand" role="alert">{{ note_error }}</span>{% endif %}
+      <button type="submit" class="btn btn-ghost self-start text-sm">Add note</button>
+    </form>
+    <ol class="flex flex-col">
+      {% for e in inquiry.events %}
+      <li class="flex gap-3 border-t border-line py-3 text-sm">
+        <i class="ph {{ 'ph-note' if e.kind == 'note' else ('ph-arrows-left-right' if e.kind == 'stage' else 'ph-gear-six') }} mt-0.5 text-muted" aria-hidden="true"></i>
+        <div class="min-w-0 flex-1">
+          <p class="{% if e.kind != 'note' %}text-muted {% endif %}whitespace-pre-line">{{ e.body }}</p>
+          <p class="mt-1 font-mono text-xs text-muted">{{ e.author.email if e.author else "System" }} · {{ e.created_at | local_time("long") }}</p>
+        </div>
+      </li>
+      {% endfor %}
+      <li class="flex gap-3 border-t border-line py-3 text-sm">
+        <i class="ph ph-envelope-simple mt-0.5 text-muted" aria-hidden="true"></i>
+        <div>
+          <p class="text-muted">Quote request received from dhmgroup.net</p>
+          <p class="mt-1 font-mono text-xs text-muted">{{ inquiry.created_at | local_time("long") }}</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
