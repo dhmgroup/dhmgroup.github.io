@@ -1,0 +1,61 @@
+{% from "admin/_macros.html" import unread_dot, empty_state %}
+<section id="inquiry-list"
+         class="min-w-0 flex-1 lg:max-w-xl lg:border-r lg:border-line"
+         hx-get="{{ list_url }}" hx-trigger="inquiry-changed from:document" hx-target="this" hx-swap="outerHTML">
+  <div class="flex min-h-16 items-center justify-between gap-4 border-b border-line px-4 sm:px-6">
+    <h1 class="text-xl font-semibold tracking-tight">Inquiries</h1>
+    <form role="search" action="/admin/inquiries" hx-get="/admin/inquiries" hx-target="#inquiry-list" hx-swap="outerHTML"
+          hx-trigger="input changed delay:300ms from:find input, submit" hx-push-url="true" class="w-40 sm:w-56">
+      <input type="hidden" name="stage" value="{{ stage }}">
+      <label class="sr-only" for="inquiry-search">Search inquiries</label>
+      <input id="inquiry-search" name="q" type="search" value="{{ q }}" placeholder="Search" class="field py-2 text-sm">
+    </form>
+  </div>
+  <nav aria-label="Stages" class="flex gap-1 overflow-x-auto border-b border-line px-2 py-2 sm:px-4">
+    {% for tab in tabs %}
+    {% set label = stages[tab][0] if tab in stages else "Archived" %}
+    {% set href = "/admin/inquiries?stage=" ~ tab ~ ("&q=" ~ (q | urlencode) if q else "") %}
+    <a href="{{ href }}"
+       hx-get="{{ href }}" hx-target="#inquiry-list" hx-swap="outerHTML" hx-push-url="true"
+       {% if tab == stage %}aria-current="page"{% endif %}
+       data-count-{{ tab }}="{{ counts[tab] }}"
+       class="flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-sm text-muted transition-colors duration-200 hover:text-white aria-[current=page]:bg-brand aria-[current=page]:text-black">
+      {{ label }} <span class="font-mono text-xs">{{ counts[tab] }}</span>
+    </a>
+    {% endfor %}
+  </nav>
+  {% if items %}
+  <ul class="divide-y divide-line">
+    {% for i in items %}
+    <li>
+      <a href="/admin/inquiries/{{ i.id }}?stage={{ stage }}{% if q %}&amp;q={{ q | urlencode }}{% endif %}"
+         hx-get="/admin/inquiries/{{ i.id }}" hx-target="#inquiry-panel" hx-swap="outerHTML" hx-push-url="true"
+         class="flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-panel sm:px-6">
+        {{ unread_dot(i) }}
+        <span class="min-w-0 flex-1">
+          <span class="flex items-baseline justify-between gap-3">
+            <span class="truncate {% if not i.read_at %}font-semibold{% else %}font-medium{% endif %}">{{ i.name }}</span>
+            <span class="shrink-0 font-mono text-xs text-muted">{{ i.created_at | local_time }}</span>
+          </span>
+          <span class="flex items-center gap-2 text-sm text-muted">
+            <span class="truncate">{{ i.company or i.email }}</span>
+            {% if i.services %}<span aria-hidden="true">·</span><span class="truncate">{{ i.services | join(", ") }}</span>{% endif %}
+            {% if not i.notified_at %}<i class="ph ph-envelope-simple-open ml-auto shrink-0 text-brand" title="Notification email not sent" aria-label="Notification email not sent"></i>{% endif %}
+          </span>
+        </span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% if page > 1 or has_next %}
+  <nav aria-label="Pages" class="flex justify-between px-4 py-4 text-sm sm:px-6">
+    {% if page > 1 %}<a class="btn btn-ghost text-sm" href="{{ page_url(page - 1) }}" hx-get="{{ page_url(page - 1) }}" hx-target="#inquiry-list" hx-swap="outerHTML" hx-push-url="true">Newer</a>{% else %}<span></span>{% endif %}
+    {% if has_next %}<a class="btn btn-ghost text-sm" href="{{ page_url(page + 1) }}" hx-get="{{ page_url(page + 1) }}" hx-target="#inquiry-list" hx-swap="outerHTML" hx-push-url="true">Older</a>{% endif %}
+  </nav>
+  {% endif %}
+  {% elif q %}
+  {{ empty_state("ph-magnifying-glass", "No matches", "Nothing in this stage matches “" ~ q ~ "”. Try another stage or a shorter search.") }}
+  {% else %}
+  {{ empty_state("ph-tray", "Nothing here yet", "Leads move through New, Contacted, Quoted and Won or Lost as you work them. Archive spam to keep the pipeline clean.") }}
+  {% endif %}
+</section>

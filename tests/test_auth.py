@@ -112,7 +112,6 @@ async def test_admin_requires_login(client):
     assert r.headers["location"] == "/admin/login?next=/admin"
 
 
-@pytest.mark.xfail(reason="admin routes land in Tasks 4-5", strict=True)
 async def test_htmx_request_without_session_gets_hx_redirect(client):
     r = await client.get("/admin/inquiries?stage=new", headers={"HX-Request": "true"})
     assert r.status_code == 204

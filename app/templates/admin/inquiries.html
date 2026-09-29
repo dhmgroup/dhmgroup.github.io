@@ -1,0 +1,13 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+<div class="flex min-h-dvh">
+  {% include "admin/_inquiry_list.html" %}
+  {% if inquiry %}
+    {% include "admin/_inquiry_panel.html" %}
+  {% else %}
+  <section id="inquiry-panel" class="hidden flex-1 items-center justify-center text-sm text-muted lg:flex">
+    Select an inquiry to see the message and its history.
+  </section>
+  {% endif %}
+</div>
+{% endblock %}
