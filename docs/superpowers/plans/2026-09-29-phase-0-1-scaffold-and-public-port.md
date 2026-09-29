@@ -16,7 +16,7 @@
 - Async only: no sync DB, file or network calls inside request handlers.
 - Public markup is copied from the current `index.html`, `legal.html` and `404.html` unchanged except where a task says otherwise. Colours, radii, spacing and type come only from `DESIGN.md` tokens.
 - The Action Orange Rule: `#F05A2B` (`brand`) only on the primary action, selected/live state, focus, selection and errors.
-- Every schema change ships an Alembic migration; `uv run alembic check` must pass.
+- Every schema change ships an Alembic migration generated with `uv run alembic revision --autogenerate`. Never write or hand-edit migration files; if the output is wrong, fix the model and regenerate. `uv run alembic check` must pass.
 - Tailwind version is `v4.3.3`, pinned in two places: `app/cli.py` (`TAILWIND_VERSION`) and `Dockerfile` (`ARG TAILWINDCSS_VERSION`). Keep them equal.
 - Python `>=3.13`; Docker images use `python:3.13-slim`.
 - Seed contact details (verbatim): `contact@dhmgroup.net`, `+260 770 005 939`, `Plot 4280 Chikola Loop Area` / `Chingola, Zambia`; socials `https://www.linkedin.com/company/dhmgroup`, `https://www.facebook.com/dhmgroup`, `https://www.instagram.com/dhmgroup`, `https://x.com/dhmgroup`, `https://www.tiktok.com/@dhmgroup`, `https://www.youtube.com/@dhmgroup`.
@@ -930,7 +930,7 @@ New feature = new package under `app/` with `models.py` and `routes.py`; add its
 - **Async all the way.** No sync DB drivers, `requests`, `open()` on large files, or `time.sleep` in handlers. Use asyncpg, aioboto3, aiosmtplib.
 - **One session per request** via `Depends(get_session)`. Never create engines in handlers.
 - **Timestamps** use `app.db.utcnow` as a Python-side default. Do not use server-side `onupdate`: an expired attribute lazy-loads, which fails under asyncio.
-- **Schema changes** always get an Alembic migration, and `uv run alembic check` must pass.
+- **Migrations are always generated, never written by hand.** Change the models, then run `uv run alembic revision --autogenerate -m "..."`. Do not create or hand-write migration files, and do not add operations to generated ones. If autogenerate misses or gets a change wrong, fix the model (or `migrations/env.py` compare settings), delete the generated file and regenerate. Review each generated file before committing, and `uv run alembic check` must pass.
 - **Design tokens only.** Use Tailwind classes backed by the `@theme` in `app/static/src/app.css`, which mirrors `DESIGN.md`. No new colours, radii or fonts.
 - **The Action Orange Rule.** `brand` (#F05A2B) appears only on the primary action, selected or live state, focus, selection and errors.
 - **Public markup parity.** Public templates are ports of the original static pages. Visual changes to them need a before/after screenshot check at 1440px and 390px.
