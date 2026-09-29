@@ -1,0 +1,39 @@
+{% extends "admin/layout.html" %}
+{% from "admin/_macros.html" import page_header, stage_chip, unread_dot, empty_state %}
+{% macro lead_rows(items) -%}
+<ul class="divide-y divide-line border-y border-line">
+  {% for i in items %}
+  <li>
+    <a href="/admin/inquiries/{{ i.id }}" class="flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-panel sm:px-6">
+      {{ unread_dot(i) }}
+      <span class="min-w-0 flex-1">
+        <span class="block truncate {% if not i.read_at %}font-semibold{% else %}font-medium{% endif %}">{{ i.name }}</span>
+        <span class="block truncate text-sm text-muted">{{ i.company or i.email }}</span>
+      </span>
+      {{ stage_chip(stages, i.stage) }}
+      <span class="w-14 shrink-0 text-right font-mono text-xs text-muted">{{ i.created_at | local_time }}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{%- endmacro %}
+{% block content %}
+  {% call page_header("Overview") %}
+    <form method="post" action="/admin/logout" class="sm:hidden">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="btn btn-ghost text-sm">Sign out</button>
+    </form>
+  {% endcall %}
+  <section class="pt-6" aria-labelledby="needs-reply">
+    <h2 id="needs-reply" class="px-4 pb-3 text-sm font-medium text-muted sm:px-6">Needs a reply <span class="font-mono">{{ needs_reply | length }}</span></h2>
+    {% if needs_reply %}{{ lead_rows(needs_reply) }}{% else %}
+    {{ empty_state("ph-check", "No leads waiting", "New quote requests from dhmgroup.net land here until someone moves them to Contacted.") }}
+    {% endif %}
+  </section>
+  <section class="pt-8" aria-labelledby="in-progress">
+    <h2 id="in-progress" class="px-4 pb-3 text-sm font-medium text-muted sm:px-6">In progress <span class="font-mono">{{ in_progress | length }}</span></h2>
+    {% if in_progress %}{{ lead_rows(in_progress) }}{% else %}
+    {{ empty_state("ph-hourglass", "Nothing in progress", "Leads you have contacted or quoted appear here so follow-ups do not slip.") }}
+    {% endif %}
+  </section>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% macro nav_item(href, icon, label, current, badge=0) -%}
+<li class="flex-1 sm:flex-none">
+  <a href="{{ href }}" {% if current %}aria-current="page"{% endif %}
+     class="group relative flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs text-muted transition-colors duration-200 hover:text-white aria-[current=page]:text-white sm:justify-center lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-sm lg:aria-[current=page]:bg-raised">
+    <i class="ph {{ icon }} text-xl transition-colors duration-200 group-aria-[current=page]:text-brand" aria-hidden="true"></i>
+    <span class="sm:sr-only lg:not-sr-only">{{ label }}</span>
+    {% if badge %}
+    <span class="absolute right-1 top-1 min-w-5 rounded-full bg-brand px-1.5 text-center font-mono text-xs leading-5 text-black lg:static lg:ml-auto" aria-label="{{ badge }} unread">{{ badge }}</span>
+    {% endif %}
+  </a>
+</li>
+{%- endmacro %}
+
+{% macro page_header(title, count=None) -%}
+<header class="flex min-h-16 items-center justify-between gap-4 border-b border-line px-4 sm:px-6">
+  <h1 class="text-xl font-semibold tracking-tight">{{ title }}{% if count is not none %} <span class="font-mono text-sm font-medium text-muted">{{ count }}</span>{% endif %}</h1>
+  {% if caller %}<div class="flex items-center gap-2">{{ caller() }}</div>{% endif %}
+</header>
+{%- endmacro %}
+
+{% macro stage_chip(stages, stage) -%}
+{% set label, icon = stages[stage] %}
+<span class="inline-flex shrink-0 items-center gap-1 rounded-full border border-line bg-raised px-2 py-0.5 text-xs text-white"><i class="ph {{ icon }}" aria-hidden="true"></i>{{ label }}</span>
+{%- endmacro %}
+
+{% macro unread_dot(inquiry) -%}
+{% if not inquiry.read_at %}<span class="size-2 shrink-0 rounded-full bg-brand" aria-label="Unread"></span>{% else %}<span class="size-2 shrink-0" aria-hidden="true"></span>{% endif %}
+{%- endmacro %}
+
+{% macro empty_state(icon, title, body) -%}
+<div class="flex flex-col items-start gap-2 px-4 py-12 sm:px-6">
+  <i class="ph {{ icon }} text-2xl text-muted" aria-hidden="true"></i>
+  <p class="font-medium">{{ title }}</p>
+  <p class="max-w-sm text-sm text-muted">{{ body }}</p>
+</div>
+{%- endmacro %}

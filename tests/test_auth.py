@@ -106,7 +106,6 @@ async def test_inactive_user_cannot_log_in(client, admin, session):
     assert r.status_code == 401
 
 
-@pytest.mark.xfail(reason="admin routes land in Tasks 4-5", strict=True)
 async def test_admin_requires_login(client):
     r = await client.get("/admin")
     assert r.status_code == 303
@@ -132,7 +131,6 @@ async def test_logout_with_csrf_redirects(admin_client):
     assert r.headers["location"] == "/admin/login"
 
 
-@pytest.mark.xfail(reason="admin routes land in Tasks 4-5", strict=True)
 async def test_logout_clears_session(admin_client):
     await admin_client.post("/admin/logout")
     assert (await admin_client.get("/admin")).status_code == 303

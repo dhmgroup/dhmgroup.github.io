@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "admin/_macros.html" import nav_item %}
+{% block title %}{{ title }} | DHM admin{% endblock %}
+{% block meta %}<meta name="robots" content="noindex"><meta name="csrf-token" content="{{ csrf_token }}">{% endblock %}
+{% block body_class %}min-h-dvh{% endblock %}
+{% block body %}
+<div class="flex min-h-dvh" hx-headers:inherited='{"X-CSRF-Token": "{{ csrf_token }}"}'>
+  <nav aria-label="Admin"
+       class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-panel sm:sticky sm:top-0 sm:h-dvh sm:w-16 sm:shrink-0 sm:border-r sm:border-t-0 lg:w-56">
+    <div class="flex h-full sm:flex-col">
+      <a href="/admin" class="hidden h-16 items-center justify-center px-4 sm:flex lg:justify-start">
+        <img src="/static/img/logo-light.png" alt="DHM Group admin" width="640" height="314" class="h-6 w-auto">
+      </a>
+      <ul class="flex flex-1 px-1 sm:flex-col sm:gap-1 sm:px-2" data-unread-count="{{ unread_count }}">
+        {{ nav_item("/admin", "ph-squares-four", "Overview", section == "overview") }}
+        {{ nav_item("/admin/inquiries", "ph-tray", "Inquiries", section == "inquiries", badge=unread_count) }}
+      </ul>
+      <form method="post" action="/admin/logout" class="hidden p-2 sm:block">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="flex w-full items-center justify-center gap-3 rounded-lg px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-white lg:justify-start" title="Sign out {{ user.email }}">
+          <i class="ph ph-sign-out text-xl" aria-hidden="true"></i><span class="sr-only lg:not-sr-only">Sign out</span>
+        </button>
+      </form>
+    </div>
+  </nav>
+  <main id="main" class="min-w-0 flex-1 pb-20 sm:pb-0">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<div id="toasts" class="pointer-events-none fixed inset-x-4 bottom-20 z-50 flex flex-col items-end gap-2 sm:bottom-4 sm:left-auto" aria-live="polite"></div>
+<script src="/static/vendor/htmx/htmx.min.js" defer></script>
+<script src="/static/js/admin.js" defer></script>
+{% endblock %}

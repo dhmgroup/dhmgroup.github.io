@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
+from app.admin.routes import router as admin_router
 from app.auth.deps import NotAuthenticated
 from app.auth.routes import router as auth_router
 from app.config import settings
@@ -45,6 +46,7 @@ app.include_router(legal_router)
 app.include_router(public_router)
 app.include_router(inquiries_router)
 app.include_router(auth_router)
+app.include_router(admin_router)
 
 
 @app.exception_handler(NotAuthenticated)
