@@ -72,7 +72,7 @@ uv run alembic check
 1. Deploy on Coolify with a temporary domain and check every page.
 2. Lower the DNS TTL for `dhmgroup.net` a day ahead.
 3. Point the `A`/`AAAA` (or `CNAME`) records at the VPS and assign the domain in Coolify.
-4. Once TLS is issued, disable GitHub Pages for the repository and remove the `CNAME` file.
+4. Once TLS is issued, disable GitHub Pages for the repository. (This branch no longer has the Pages `CNAME` file; merging it into `main` removes it there.)
 5. Check that `https://dhmgroup.net/app-ads.txt` still returns the ad seller list; AdMob depends on it.
 
 ## Content notes

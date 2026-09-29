@@ -34,7 +34,7 @@ DHM does not only build for clients; it ships and runs its own consumer apps in 
 - Name: DHM Group. Tagline: "endless possibilities".
 - Colours: orange `#F05A2B`, black `#000000` (binding).
 - Visual stance (user choice, after two re-rolls): clean, premium tech studio executed straight, no themed metaphor. Craft bar: Linear and Framer.
-- Assets: `logo.png` (black DHM wordmark, orange accent shard, "GROUP" beneath), `tagline.png` (white "endless possibilities" with orange hand-drawn swash; designed for dark backgrounds).
+- Assets: `app/static/img/logo-light.png` (white DHM wordmark, orange accent shard, "GROUP" beneath), `app/static/img/tagline.png` (white "endless possibilities" with orange hand-drawn swash; designed for dark backgrounds). The original full-size artwork (`logo.png`, `tagline.png`) was removed from the repo root; recover it from git history with `git show b61fac2:logo.png > logo.png`.
 
 ## Evidence on Hand
 

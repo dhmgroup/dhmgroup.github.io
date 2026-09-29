@@ -1,6 +1,3 @@
-# Gitignore for Jekyll
-CNAME
-
 # Python
 .venv/
 __pycache__/
