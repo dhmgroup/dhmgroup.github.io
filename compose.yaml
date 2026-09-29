@@ -16,5 +16,11 @@ services:
       interval: 2s
       retries: 20
 
+  mail:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # web UI: http://localhost:8025
+
 volumes:
   pgdata:

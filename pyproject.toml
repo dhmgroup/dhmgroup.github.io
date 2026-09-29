@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "DHM Group website and admin dashboard"
 requires-python = ">=3.13"
 dependencies = [
+    "aiosmtplib>=5.1",
     "alembic>=1.20",
     "asyncpg>=0.31",
     "fastapi>=0.141",
