@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ page.title }} | DHM Group{% endblock %}
+{% block description %}{{ page.title }} for DHM Group and the dhmgroup.net website.{% endblock %}
+{% block body_class %}px-4 py-16 sm:px-6{% endblock %}
+{% block body %}
+  <main class="mx-auto flex max-w-[680px] flex-col gap-12">
+    <a href="/" class="flex items-center gap-2 text-sm text-neutral-400 transition-all duration-700 ease-fluid hover:text-white">Back to DHM Group</a>
+    <article class="flex flex-col gap-4 text-neutral-300">
+      <h1 class="text-4xl font-semibold tracking-tight text-white">{{ page.title }}</h1>
+      <p class="text-sm text-muted">Last updated <time datetime="{{ page.updated_at.date().isoformat() }}">{{ page.updated_at.day }} {{ page.updated_at.strftime('%B %Y') }}</time></p>
+      <div class="legal-prose flex flex-col gap-4">{{ page.body_md | markdown }}</div>
+    </article>
+    {% if legal_pages | length > 1 %}
+      <nav aria-label="Legal" class="flex flex-wrap gap-6 border-t border-line pt-8 text-sm text-muted">
+        {% for p in legal_pages if p.slug != page.slug %}
+          <a href="/legal/{{ p.slug }}" class="transition-all duration-700 ease-fluid hover:text-white">{{ p.title }}</a>
+        {% endfor %}
+      </nav>
+    {% endif %}
+  </main>
+{% endblock %}

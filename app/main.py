@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.db import engine, get_session
+from app.legal.routes import router as legal_router
 from app.templating import APP_DIR, templates
 
 logger = logging.getLogger("app")
@@ -24,6 +25,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 app.mount("/static", StaticFiles(directory=APP_DIR / "static"), name="static")
+app.include_router(legal_router)
 
 
 @app.exception_handler(StarletteHTTPException)
