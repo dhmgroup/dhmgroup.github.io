@@ -5,13 +5,17 @@
   <div class="flex min-h-16 items-center justify-between gap-4 border-b border-line px-4 sm:px-6">
     <h1 class="text-xl font-semibold tracking-tight">Inquiries</h1>
     <form role="search" action="/admin/inquiries" hx-get="/admin/inquiries" hx-target="#inquiry-list" hx-swap="outerHTML"
-          hx-trigger="input changed delay:300ms from:find input, submit" hx-push-url="true" class="w-40 sm:w-56">
+          hx-push-url="true" class="w-40 sm:w-56">
       <input type="hidden" name="stage" value="{{ stage }}">
       <label class="sr-only" for="inquiry-search">Search inquiries</label>
-      <input id="inquiry-search" name="q" type="search" value="{{ q }}" placeholder="Search" class="field py-2 text-sm">
+      {#- Typing swaps only #inquiry-results, so the box being typed in is never replaced. -#}
+      <input id="inquiry-search" name="q" type="search" value="{{ q }}" placeholder="Search" class="field py-2 text-sm"
+             hx-get="/admin/inquiries" hx-trigger="input changed delay:300ms" hx-include="closest form"
+             hx-target="#inquiry-results" hx-select="#inquiry-results" hx-swap="outerHTML" hx-push-url="true">
     </form>
   </div>
-  <nav aria-label="Stages" class="flex gap-1 overflow-x-auto border-b border-line px-2 py-2 sm:px-4">
+  <div id="inquiry-results">
+  <nav aria-label="Stages" class="flex flex-wrap gap-1 border-b border-line px-2 py-2 sm:px-4">
     {% for tab in tabs %}
     {% set label = stages[tab][0] if tab in stages else "Archived" %}
     {% set href = "/admin/inquiries?stage=" ~ tab ~ ("&q=" ~ (q | urlencode) if q else "") %}
@@ -19,7 +23,7 @@
        hx-get="{{ href }}" hx-target="#inquiry-list" hx-swap="outerHTML" hx-push-url="true"
        {% if tab == stage %}aria-current="page"{% endif %}
        data-count-{{ tab }}="{{ counts[tab] }}"
-       class="flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-sm text-muted transition-colors duration-200 hover:text-white aria-[current=page]:bg-brand aria-[current=page]:text-black">
+       class="flex min-h-11 shrink-0 items-center gap-2 rounded-full px-3 text-sm text-muted sm:min-h-9 transition-colors duration-200 hover:text-white aria-[current=page]:bg-brand aria-[current=page]:text-black">
       {{ label }} <span class="font-mono text-xs">{{ counts[tab] }}</span>
     </a>
     {% endfor %}
@@ -30,7 +34,8 @@
     <li>
       <a href="/admin/inquiries/{{ i.id }}?stage={{ stage }}{% if q %}&amp;q={{ q | urlencode }}{% endif %}"
          hx-get="/admin/inquiries/{{ i.id }}" hx-target="#inquiry-panel" hx-swap="outerHTML" hx-push-url="true"
-         class="flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-panel sm:px-6">
+         data-inquiry-id="{{ i.id }}" {% if inquiry is defined and inquiry and inquiry.id == i.id %}aria-current="true"{% endif %}
+         class="flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-panel aria-[current=true]:bg-raised sm:px-6">
         {{ unread_dot(i) }}
         <span class="min-w-0 flex-1">
           <span class="flex items-baseline justify-between gap-3">
@@ -38,7 +43,7 @@
             <span class="shrink-0 font-mono text-xs text-muted">{{ i.created_at | local_time }}</span>
           </span>
           <span class="flex items-center gap-2 text-sm text-muted">
-            <span class="truncate">{{ i.company or i.email }}</span>
+            <span class="truncate">{% if i.company %}{{ i.company }}{% else %}<span class="font-mono">{{ i.email }}</span>{% endif %}</span>
             {% if i.services %}<span aria-hidden="true">·</span><span class="truncate">{{ i.services | join(", ") }}</span>{% endif %}
             {% if not i.notified_at %}<i class="ph ph-envelope-simple-open ml-auto shrink-0 text-brand" title="Notification email not sent" aria-label="Notification email not sent"></i>{% endif %}
           </span>
@@ -58,4 +63,5 @@
   {% else %}
   {{ empty_state("ph-tray", "Nothing here yet", "Leads move through New, Contacted, Quoted and Won or Lost as you work them. Archive spam to keep the pipeline clean.") }}
   {% endif %}
+  </div>
 </section>

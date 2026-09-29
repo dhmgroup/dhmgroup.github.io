@@ -41,8 +41,9 @@ async def login(request: Request, session: AsyncSession = Depends(get_session)):
     password = str(form.get("password") or "")
     next_path = safe_next(str(form.get("next") or ""))
     ip = request.client.host if request.client else "unknown"
+    limit_key = f"{ip}|{email}"
 
-    if not login_limiter.hit(f"{ip}|{email}"):
+    if login_limiter.blocked(limit_key):
         return _render(
             request,
             email=email,
@@ -56,6 +57,7 @@ async def login(request: Request, session: AsyncSession = Depends(get_session)):
         verify_password, user.password_hash if user else _DUMMY_HASH, password
     )
     if not (user and ok and user.is_active):
+        login_limiter.hit(limit_key)  # only failures count towards the lockout
         return _render(
             request,
             email=email,

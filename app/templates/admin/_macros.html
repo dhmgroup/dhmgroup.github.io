@@ -2,11 +2,12 @@
 <li class="flex-1 sm:flex-none">
   <a href="{{ href }}" {% if current %}aria-current="page"{% endif %}
      class="group relative flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs text-muted transition-colors duration-200 hover:text-white aria-[current=page]:text-white sm:justify-center lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-sm lg:aria-[current=page]:bg-raised">
-    <i class="ph {{ icon }} text-xl transition-colors duration-200 group-aria-[current=page]:text-brand" aria-hidden="true"></i>
+    <span class="relative">
+      <i class="ph {{ icon }} text-xl transition-colors duration-200 group-aria-[current=page]:text-brand" aria-hidden="true"></i>
+      {% if badge %}<span class="absolute -right-3 -top-1.5 min-w-5 rounded-full bg-brand px-1.5 text-center font-mono text-xs leading-5 text-black lg:hidden" aria-label="{{ badge }} unread">{{ badge }}</span>{% endif %}
+    </span>
     <span class="sm:sr-only lg:not-sr-only">{{ label }}</span>
-    {% if badge %}
-    <span class="absolute right-1 top-1 min-w-5 rounded-full bg-brand px-1.5 text-center font-mono text-xs leading-5 text-black lg:static lg:ml-auto" aria-label="{{ badge }} unread">{{ badge }}</span>
-    {% endif %}
+    {% if badge %}<span class="hidden min-w-5 rounded-full bg-brand px-1.5 text-center font-mono text-xs leading-5 text-black lg:ml-auto lg:inline-block" aria-label="{{ badge }} unread">{{ badge }}</span>{% endif %}
   </a>
 </li>
 {%- endmacro %}

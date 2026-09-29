@@ -13,3 +13,14 @@ document.addEventListener('htmx:after:settle', e => {
 document.addEventListener('htmx:error', () => {
   document.dispatchEvent(new CustomEvent('toast', { detail: { value: 'Something went wrong. Check your connection and try again.' } }));
 });
+
+// Mark the open lead's row in the list: after panel swaps, list refreshes and on first load.
+const markCurrentRow = () => {
+  const id = location.pathname.match(/^\/admin\/inquiries\/(\d+)/)?.[1];
+  document.querySelectorAll('#inquiry-list a[data-inquiry-id]').forEach(a => {
+    if (a.dataset.inquiryId === id) a.setAttribute('aria-current', 'true');
+    else a.removeAttribute('aria-current');
+  });
+};
+markCurrentRow();
+document.addEventListener('htmx:after:settle', markCurrentRow);

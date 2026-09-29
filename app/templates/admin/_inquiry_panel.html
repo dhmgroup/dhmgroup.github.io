@@ -33,7 +33,7 @@
         {% for value, (label, icon) in stages.items() %}
         <label class="cursor-pointer">
           <input type="radio" name="stage" value="{{ value }}" class="peer sr-only" {% if inquiry.stage == value %}checked{% endif %}>
-          <span class="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-sm transition-colors duration-200 hover:border-white/40 peer-checked:border-brand peer-checked:bg-brand peer-checked:text-black peer-focus-visible:outline-2 peer-focus-visible:outline-brand">
+          <span class="flex min-h-11 items-center gap-1.5 rounded-full border border-line px-3 text-sm text-muted transition-colors duration-200 hover:border-white/40 hover:text-white peer-checked:border-white peer-checked:bg-raised peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-brand sm:min-h-9">
             <i class="ph {{ icon }}" aria-hidden="true"></i>{{ label }}
           </span>
         </label>

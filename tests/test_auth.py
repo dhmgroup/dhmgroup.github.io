@@ -133,3 +133,11 @@ async def test_logout_with_csrf_redirects(admin_client):
 async def test_logout_clears_session(admin_client):
     await admin_client.post("/admin/logout")
     assert (await admin_client.get("/admin")).status_code == 303
+
+
+async def test_successful_logins_do_not_use_up_the_limit(client, admin):
+    for _ in range(6):
+        r = await client.post(
+            "/admin/login", data={"email": "admin@dhmgroup.net", "password": "admin-password-1"}
+        )
+        assert r.status_code == 303

@@ -36,3 +36,12 @@ def test_clear_resets_everything():
     limiter.hit("ip")
     limiter.clear()
     assert limiter.hit("ip") is True
+
+
+def test_blocked_checks_without_recording():
+    limiter = RateLimiter(limit=2, window=60, clock=Clock())
+    assert limiter.blocked("ip") is False
+    assert limiter.blocked("ip") is False  # checking alone never uses up the allowance
+    limiter.hit("ip")
+    limiter.hit("ip")
+    assert limiter.blocked("ip") is True

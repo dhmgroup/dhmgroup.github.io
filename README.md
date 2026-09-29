@@ -40,8 +40,23 @@ Settings come from environment variables (or `.env` locally).
 | `SMTP_TLS` | `false` | `true` for implicit TLS (port 465) |
 | `SMTP_STARTTLS` | `false` | `true` for STARTTLS (port 587) |
 | `SMTP_FROM` | `DHM Group <no-reply@dhmgroup.net>` | Sender of notification emails |
+| `SECRET_KEY` | development placeholder | Signs the admin session cookie. Required in production: 64 random characters |
+| `TIMEZONE` | `Africa/Lusaka` | Time zone for times shown in the admin |
 
-S3 and session secrets (Phase 3) are documented here when that phase lands.
+S3 settings are documented here when Phase 3b lands.
+
+## Admin
+
+The admin dashboard lives at `/admin`. Create the first admin from the command line (it prompts for a password of at least 10 characters):
+
+```bash
+uv run dhm create-admin you@dhmgroup.net
+uv run dhm set-password you@dhmgroup.net   # reset a password
+```
+
+On Coolify, run `dhm create-admin you@dhmgroup.net` from the application terminal. Sign-in is limited to 5 failed attempts per 15 minutes per address.
+
+Quote requests appear under **Inquiries**, where each lead moves through New, Contacted, Quoted, Won or Lost (or is archived), with notes and an activity timeline.
 
 ## Database changes
 
@@ -68,7 +83,7 @@ uv run alembic check
 
 1. **Database.** In Coolify, add a PostgreSQL 17 resource. Copy its internal connection URL and change the scheme to `postgresql+asyncpg://`.
 2. **Application.** Add an application from this Git repository, branch `fullstack` until cutover (then `main`). Build pack: **Dockerfile**. Port: **8000**.
-3. **Environment.** Set `ENV=production`, `DATABASE_URL`, `BASE_URL=https://dhmgroup.net` and the `SMTP_*` variables for the mail server that sends inquiry notifications.
+3. **Environment.** Set `ENV=production`, `SECRET_KEY`, `DATABASE_URL`, `BASE_URL=https://dhmgroup.net` and the `SMTP_*` variables for the mail server that sends inquiry notifications.
 4. **Domain.** Assign `dhmgroup.net` (and `www.dhmgroup.net` if used). Coolify's proxy handles TLS.
 5. **Deploy.** Migrations run automatically on container start. After the first deploy, open the application terminal in Coolify and run `dhm seed`.
 6. **Health.** The container reports health from `/healthz`, which also checks the database.

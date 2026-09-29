@@ -20,7 +20,8 @@ Read before changing anything visible:
 | 0 | Scaffold, Docker, docs | done |
 | 1 | Public site port (landing, legal, 404, app-ads.txt) | done |
 | 2 | Inquiries: form endpoint, validation, spam guards, SMTP | done |
-| 3 | Admin: auth, inbox, legal, projects, settings, assets | next |
+| 3a | Admin auth, shell, inquiry pipeline | done |
+| 3b | Admin legal, projects, settings, assets (S3) | next |
 | 4 | Cutover from GitHub Pages to Coolify | not started |
 
 Update this table in the commit that finishes a phase.
@@ -58,12 +59,14 @@ app/
   ratelimit.py    in-memory RateLimiter
   cli.py          `dhm` command
   seed.py         default content
+  auth/           User, argon2 passwords, session + CSRF guard (deps.py), sign-in routes
+  admin/          admin shell: shared admin_context, overview route
   site/           SiteSettings (single row): contact details, socials, get_site_settings
   legal/          LegalPage, Markdown rendering, public routes
   projects/       Project ("Our apps" panels)
-  inquiries/      Inquiry, quote form validation, email notification, POST /inquiries
+  inquiries/      Inquiry + InquiryEvent pipeline, quote form, email notification, POST /inquiries, admin.py (list + record)
   public/         landing page, robots.txt, sitemap.xml, app-ads.txt
-  templates/      base.html, public/, admin/ (Phase 3)
+  templates/      base.html, public/, admin/ (Ledger shell; see .impeccable/surfaces/app-templates-admin-layout-html.md)
   static/         src/app.css (Tailwind entry), dist/ (built, gitignored), img/, js/, vendor/
 migrations/       Alembic (async env); versions/ holds generated revisions only
 tests/            pytest against the compose Postgres
@@ -83,7 +86,9 @@ New feature = new package under `app/` with `models.py` and `routes.py`; add its
 - **Templates autoescape.** Only mark HTML safe through the `markdown` filter (sanitised with nh3). Never `|safe` user or admin input.
 - **No fabricated proof.** No client names, testimonials, statistics or download counts (see PRODUCT.md).
 - **htmx (Phase 2+)**: partials live beside their page template, prefixed `_`. Route handlers check for htmx requests through one helper in `app/htmx.py`.
-- **Admin (Phase 3+)**: every non-GET admin request is CSRF-checked. Never trust upload file names or client-sent content types.
+- **Admin (Phase 3+)**: every non-GET admin request is CSRF-checked (`verify_csrf`) and every admin route depends on `require_admin`. Never trust upload file names or client-sent content types.
+- **Admin UI** follows the Ledger brief in `.impeccable/surfaces/app-templates-admin-layout-html.md`; read it and `DESIGN.md` before changing admin templates. Orange stays on the primary action, selected tab/nav, unread and errors; stages are neutral.
+- **Admin forms** are validated with Pydantic v2 models.
 
 ## Gotchas
 
@@ -94,4 +99,6 @@ New feature = new package under `app/` with `models.py` and `routes.py`; add its
 - `.env` is for local dev only. In production every setting comes from Coolify env vars.
 - htmx 4 (npm tag `next`) is not htmx 2. Most examples online are htmx 2; check the htmx 4 docs and the vendored source.
 - ruff excludes `docs/` (it would otherwise reformat code blocks in the plans).
+- Alembic autogenerate cannot add a table-level CHECK constraint to an existing table. Put the check on the column type instead (`Enum(..., create_constraint=True, name=...)`), as `Inquiry.stage` does.
+- htmx 4 swaps: an element that is replaced while the user types in it loses the caret, and `from:#id` triggers can bind to the outgoing element. Swap a region beside the input (see the inquiry search) rather than the input itself.
 - On Windows a running `uv run dhm dev` locks `.venv/Scripts/dhm.exe`, so `uv sync`/`uv add` fail with "Access is denied". Stop the dev server first, or use `uv add --no-sync` and `uv run --no-sync`.

@@ -16,14 +16,21 @@ class RateLimiter:
         self.clock = clock
         self._hits: defaultdict[str, deque[float]] = defaultdict(deque)
 
-    def hit(self, key: str) -> bool:
+    def _current(self, key: str) -> deque[float]:
         now = self.clock()
         hits = self._hits[key]
         while hits and hits[0] <= now - self.window:
             hits.popleft()
-        if len(hits) >= self.limit:
+        return hits
+
+    def blocked(self, key: str) -> bool:
+        """True when the key is at its limit; checking does not record a hit."""
+        return len(self._current(key)) >= self.limit
+
+    def hit(self, key: str) -> bool:
+        if self.blocked(key):
             return False
-        hits.append(now)
+        self._hits[key].append(self.clock())
         return True
 
     def clear(self) -> None:
