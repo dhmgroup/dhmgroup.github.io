@@ -44,12 +44,13 @@ async def submit_quote(
     if form.website:  # honeypot filled: pretend it worked, keep nothing
         return _done_response(request, form)
 
+    if errors := form.errors():
+        return await _form_response(request, session, form, errors, 422)
+
+    # Only valid submissions count: many visitors share one carrier IP, and typos store nothing.
     client_ip = request.client.host if request.client else "unknown"
     if not quote_limiter.hit(client_ip):
         return await _form_response(request, session, form, {"form": TOO_MANY}, 429)
-
-    if errors := form.errors():
-        return await _form_response(request, session, form, errors, 422)
 
     inquiry = Inquiry(
         name=form.name,

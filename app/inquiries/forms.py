@@ -45,7 +45,8 @@ class QuoteForm:
             errors["name"] = "Keep your name under 120 characters."
         if not self.email:
             errors["email"] = REQUIRED
-        elif len(self.email) > 254 or not EMAIL_RE.match(self.email):
+        # ASCII only: the notification's Reply-To header cannot encode an internationalised address.
+        elif len(self.email) > 254 or not self.email.isascii() or not EMAIL_RE.match(self.email):
             errors["email"] = "Enter an email like name@company.com."
         if not self.message:
             errors["message"] = REQUIRED

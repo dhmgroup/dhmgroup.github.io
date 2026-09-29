@@ -66,3 +66,10 @@ def test_honeypot_is_captured():
 
 def test_services_constant_matches_form_chips():
     assert SERVICES == ("Website", "Mobile app", "Email hosting", "Not sure yet")
+
+
+def test_non_ascii_email_rejected():
+    # formataddr() cannot encode a non-ASCII address, so the notification would crash.
+    assert parse(**{**VALID, "email": "jos\u00e9@ex\u00e4mple.zm"}).errors() == {
+        "email": "Enter an email like name@company.com."
+    }

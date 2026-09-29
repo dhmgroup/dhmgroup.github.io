@@ -96,3 +96,11 @@ async def test_rate_limit(client, session, notified):
 async def test_header_injection_is_stored_on_one_line(client, session, notified):
     await client.post("/inquiries", data={**VALID, "name": "Eve\r\nBcc: x@y.co"}, headers=HX)
     assert (await session.scalar(select(Inquiry))).name == "Eve Bcc: x@y.co"
+
+
+async def test_invalid_attempts_do_not_use_up_the_rate_limit(client, session, notified):
+    for _ in range(5):
+        r = await client.post("/inquiries", data={**VALID, "email": "typo"}, headers=HX)
+        assert r.status_code == 422
+    assert (await client.post("/inquiries", data=VALID, headers=HX)).status_code == 200
+    assert await count(session) == 1
