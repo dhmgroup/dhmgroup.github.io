@@ -18,8 +18,8 @@ Read before changing anything visible:
 | Phase | Scope | Status |
 |---|---|---|
 | 0 | Scaffold, Docker, docs | done |
-| 1 | Public site port (landing, legal, 404, app-ads.txt) | in progress |
-| 2 | Inquiries: form endpoint, validation, spam guards, SMTP | not started |
+| 1 | Public site port (landing, legal, 404, app-ads.txt) | done |
+| 2 | Inquiries: form endpoint, validation, spam guards, SMTP | next |
 | 3 | Admin: auth, inbox, legal, projects, settings, assets | not started |
 | 4 | Cutover from GitHub Pages to Coolify | not started |
 
