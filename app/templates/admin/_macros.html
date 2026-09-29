@@ -35,3 +35,34 @@
   <p class="max-w-sm text-sm text-muted">{{ body }}</p>
 </div>
 {%- endmacro %}
+
+{% macro text_field(name, label, value="", error="", type="text", hint="", required=False, maxlength=None, mono=False) -%}
+<label class="flex flex-col gap-2 text-sm font-medium">
+  {{ label }}
+  <input name="{{ name }}" type="{{ type }}" value="{{ value if value is not none }}"
+         {% if required %}required{% endif %} {% if maxlength %}maxlength="{{ maxlength }}"{% endif %}
+         {% if error %}aria-invalid="true" data-autofocus{% endif %}
+         class="field py-2 text-sm{% if mono %} font-mono{% endif %}{% if error %} !border-brand{% endif %}">
+  {% if error %}<span class="text-sm font-normal text-brand" role="alert">{{ error }}</span>
+  {% elif hint %}<span class="text-xs font-normal text-muted">{{ hint }}</span>{% endif %}
+</label>
+{%- endmacro %}
+
+{% macro textarea_field(name, label, value="", error="", rows=4, hint="", maxlength=None, mono=False) -%}
+<label class="flex flex-col gap-2 text-sm font-medium">
+  {{ label }}
+  <textarea name="{{ name }}" rows="{{ rows }}" {% if maxlength %}maxlength="{{ maxlength }}"{% endif %}
+            {% if error %}aria-invalid="true" data-autofocus{% endif %}
+            class="field resize-y text-sm{% if mono %} font-mono{% endif %}{% if error %} !border-brand{% endif %}">{{ value if value is not none }}</textarea>
+  {% if error %}<span class="text-sm font-normal text-brand" role="alert">{{ error }}</span>
+  {% elif hint %}<span class="text-xs font-normal text-muted">{{ hint }}</span>{% endif %}
+</label>
+{%- endmacro %}
+
+{% macro switch(name, label, checked) -%}
+<label class="flex min-h-11 cursor-pointer items-center justify-between gap-4 text-sm font-medium sm:min-h-9">
+  {{ label }}
+  <input type="checkbox" name="{{ name }}" value="true" class="peer sr-only" {% if checked %}checked{% endif %}>
+  <span aria-hidden="true" class="relative h-6 w-11 shrink-0 rounded-full border border-line bg-raised transition-colors duration-200 after:absolute after:left-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:transition-transform after:duration-200 peer-checked:border-brand peer-checked:bg-brand peer-checked:after:translate-x-5 peer-focus-visible:outline-2 peer-focus-visible:outline-brand"></span>
+</label>
+{%- endmacro %}

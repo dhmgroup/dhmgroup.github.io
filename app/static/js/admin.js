@@ -29,3 +29,11 @@ const markCurrentRow = () => {
 };
 markCurrentRow();
 document.addEventListener('htmx:after:settle', markCurrentRow);
+
+// Copy an asset URL to the clipboard.
+document.addEventListener('click', async e => {
+  const btn = e.target.closest('[data-copy]');
+  if (!btn) return;
+  try { await navigator.clipboard.writeText(btn.dataset.copy); toast('URL copied'); }
+  catch { toast('Copy failed. Open the image and copy its address instead.'); }
+});

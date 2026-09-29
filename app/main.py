@@ -13,6 +13,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.admin.routes import router as admin_router
+from app.assets.admin import router as assets_admin_router
 from app.auth.deps import NotAuthenticated, safe_next
 from app.auth.routes import router as auth_router
 from app.config import settings
@@ -49,6 +50,7 @@ app.include_router(inquiries_router)
 app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(inquiries_admin_router)
+app.include_router(assets_admin_router)
 
 
 @app.exception_handler(NotAuthenticated)

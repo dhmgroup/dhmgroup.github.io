@@ -1,0 +1,22 @@
+{% extends "admin/layout.html" %}
+{% from "admin/_macros.html" import page_header %}
+{% block content %}
+  {{ page_header("Assets") }}
+  <form class="flex flex-wrap items-end gap-3 border-b border-line px-4 py-4 sm:px-6"
+        hx-post="/admin/assets" hx-target="#asset-grid" hx-swap="outerHTML" hx-encoding="multipart/form-data" hx-disable="find button"
+        method="post" action="/admin/assets" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="flex flex-col gap-2 text-sm font-medium">
+      File
+      <input type="file" name="file" required accept="image/png,image/jpeg,image/webp,image/avif,image/svg+xml,image/x-icon,application/pdf"
+             class="text-sm text-muted file:mr-3 file:rounded-full file:border file:border-solid file:border-line file:bg-raised file:px-3 file:py-2 file:text-sm file:text-white">
+    </label>
+    <label class="flex min-w-48 flex-1 flex-col gap-2 text-sm font-medium">
+      Alt text
+      <input name="alt_text" maxlength="300" placeholder="Describe the image for screen readers" class="field py-2 text-sm">
+    </label>
+    <button type="submit" class="btn btn-primary text-sm"><i class="ph ph-upload-simple" aria-hidden="true"></i>Upload</button>
+    <p class="w-full text-xs text-muted">PNG, JPEG, WebP, AVIF, SVG, ICO or PDF, up to 10 MB.</p>
+  </form>
+  {% include "admin/_asset_grid.html" %}
+{% endblock %}
