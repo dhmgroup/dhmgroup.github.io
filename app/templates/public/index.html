@@ -7,7 +7,7 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="DHM Group | Websites, apps and email, built to keep running">
     <meta property="og:description" content="Web development, mobile apps and business email from the team behind Pepaala News and Nchito.">
-    <meta property="og:image" content="{{ base_url }}/static/img/og.png">
+    <meta property="og:image" content="{{ site.og_src }}">
     <meta name="twitter:card" content="summary_large_image">
     <script type="application/ld+json">{{ org_ld | tojson }}</script>
     <script type="application/ld+json">{{ faq_ld | tojson }}</script>
@@ -20,7 +20,7 @@
       <nav aria-label="Main"
            class="mx-auto mt-6 flex w-max items-center gap-6 rounded-full border border-white/10 bg-black/60 py-2 pl-4 pr-2 backdrop-blur-xl">
         <a href="#top" class="shrink-0" aria-label="DHM Group home">
-          <img src="/static/img/logo-light.png"
+          <img src="{{ site.logo_src }}"
                alt="DHM Group"
                width="640"
                height="314"
@@ -276,7 +276,7 @@
             <br class="hidden md:block">
             We build it, launch it and keep it running.
           </p>
-          <img src="/static/img/tagline.png"
+          <img src="{{ site.tagline_src }}"
                alt="endless possibilities"
                width="1600"
                height="261"
@@ -367,13 +367,13 @@
     <footer class="border-t border-line px-4 py-16 sm:px-6">
       <div class="mx-auto flex max-w-6xl flex-col gap-10 md:flex-row md:items-end md:justify-between">
         <div class="flex flex-col gap-6">
-          <img src="/static/img/logo-light.png"
+          <img src="{{ site.logo_src }}"
                alt="DHM Group"
                width="640"
                height="314"
                class="h-12 w-auto self-start"
                loading="lazy">
-          <img src="/static/img/tagline.png"
+          <img src="{{ site.tagline_src }}"
                alt=""
                width="1600"
                height="261"

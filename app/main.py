@@ -23,6 +23,7 @@ from app.inquiries.admin import router as inquiries_admin_router
 from app.inquiries.routes import router as inquiries_router
 from app.legal.routes import router as legal_router
 from app.public.routes import router as public_router
+from app.site.admin import router as settings_admin_router
 from app.templating import APP_DIR, templates
 
 logger = logging.getLogger("app")
@@ -51,6 +52,7 @@ app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(inquiries_admin_router)
 app.include_router(assets_admin_router)
+app.include_router(settings_admin_router)
 
 
 @app.exception_handler(NotAuthenticated)

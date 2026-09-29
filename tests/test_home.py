@@ -118,3 +118,10 @@ async def test_faq_is_rendered_with_server_side_schema(client):
     assert t.count("<details ") == 7
     assert "FAQPage" in t
     assert "How much does a website or app cost?" in t
+
+
+async def test_home_without_slots_uses_static_images(client):
+    t = (await client.get("/")).text
+    assert 'src="/static/img/logo-light.png"' in t
+    assert '/static/img/og.png"' in t
+    assert 'href="/static/img/favicon.svg"' in t

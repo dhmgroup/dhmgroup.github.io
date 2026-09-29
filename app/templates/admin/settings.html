@@ -1,0 +1,46 @@
+{% extends "admin/layout.html" %}
+{% from "admin/_macros.html" import page_header, text_field, textarea_field %}
+{% macro val(name) %}{% set x = values[name] if name in values else site[name] %}{{ x if x is not none }}{% endmacro %}
+{% block content %}
+  {{ page_header("Settings") }}
+  <form id="settings-form" method="post" action="/admin/settings"
+        hx-post="/admin/settings" hx-target="#main" hx-select="#main" hx-swap="outerHTML"
+        class="flex max-w-2xl flex-col divide-y divide-line">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <fieldset class="flex flex-col gap-4 px-4 py-6 sm:px-6">
+      <legend class="float-left mb-4 w-full text-sm font-medium text-muted">Contact details on dhmgroup.net</legend>
+      {{ text_field("contact_email", "Contact email", val("contact_email"), errors.contact_email, type="email", mono=True, required=True) }}
+      {{ text_field("phone", "Phone", val("phone"), errors.phone, type="tel", hint="International format, for example +260 770 005 939", mono=True, required=True) }}
+      {{ textarea_field("address", "Registered address", val("address"), errors.address, rows=2, hint="One line per address line", maxlength=300) }}
+    </fieldset>
+    <fieldset class="flex flex-col gap-4 px-4 py-6 sm:px-6">
+      <legend class="float-left mb-4 w-full text-sm font-medium text-muted">Notifications</legend>
+      {{ text_field("notify_email", "Send quote requests to", val("notify_email"), errors.notify_email, type="email", hint="Every new quote request is emailed here", mono=True, required=True) }}
+    </fieldset>
+    <fieldset class="flex flex-col gap-4 px-4 py-6 sm:px-6">
+      <legend class="float-left mb-4 w-full text-sm font-medium text-muted">Social links <span class="font-normal">· leave a link empty to hide its icon</span></legend>
+      {% for field, label, icon in socials %}
+        {{ text_field(field, label, val(field), errors[field], type="url", mono=True) }}
+      {% endfor %}
+    </fieldset>
+    <fieldset class="flex flex-col gap-4 px-4 py-6 sm:px-6">
+      <legend class="float-left mb-4 w-full text-sm font-medium text-muted">Images <span class="font-normal">· upload in Assets; images need alt text</span></legend>
+      {% for slot, label in slots.items() %}
+      {% set current = values[slot] if slot in values else site[slot] %}
+      <label class="flex flex-col gap-2 text-sm font-medium">
+        {{ label | capitalize }}
+        <select name="{{ slot }}" {% if errors[slot] %}aria-invalid="true" data-autofocus{% endif %}
+                class="field py-2 text-sm{% if errors[slot] %} !border-brand{% endif %}">
+          <option value="">Built-in default</option>
+          {% for a in images %}<option value="{{ a.id }}" {% if current == a.id %}selected{% endif %}>{{ a.filename }}{% if not a.alt_text %} (no alt text){% endif %}</option>{% endfor %}
+        </select>
+        {% if errors[slot] %}<span class="text-sm font-normal text-brand" role="alert">{{ errors[slot] }}</span>{% endif %}
+      </label>
+      {% endfor %}
+    </fieldset>
+    <div class="flex items-center gap-3 px-4 py-6 sm:px-6">
+      <button type="submit" class="btn btn-primary text-sm">Save settings</button>
+      {% if errors %}<p class="text-sm text-brand" role="alert">Fix the highlighted fields.</p>{% endif %}
+    </div>
+  </form>
+{% endblock %}

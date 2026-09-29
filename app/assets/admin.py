@@ -23,8 +23,15 @@ MAX_BYTES = 10 * 1024 * 1024
 
 
 async def asset_references(session: AsyncSession, asset_id: int) -> list[str]:
-    """Where an asset is used, as labels for the admin. Task 3 adds the settings slots."""
-    return []
+    """Where an asset is used, as labels for the admin."""
+    from app.site.models import SLOTS, SiteSettings  # site imports assets: avoid an import cycle
+
+    site = await session.get(SiteSettings, 1)
+    if site is None:
+        return []
+    return [
+        f"Used as the {label}" for slot, label in SLOTS.items() if getattr(site, slot) == asset_id
+    ]
 
 
 async def _assets(session: AsyncSession):

@@ -6,7 +6,7 @@
     <title>{% block title %}DHM Group{% endblock %}</title>
     <meta name="description" content="{% block description %}{% endblock %}">
     <meta name="theme-color" content="#000000">
-    <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="{{ site.favicon_src if site is defined else '/static/img/favicon.svg' }}">
     {% block meta %}{% endblock %}
     <script>document.documentElement.classList.add('js')</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
