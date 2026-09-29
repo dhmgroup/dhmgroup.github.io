@@ -17,7 +17,8 @@ Requirements: [uv](https://docs.astral.sh/uv/) and Docker.
 ```bash
 cp .env.example .env
 uv sync
-docker compose up -d --wait        # Postgres on :5433, Mailpit on :1025 (UI http://localhost:8025)
+docker compose up -d --wait        # Postgres :5433, Mailpit :1025 (UI :8025), MinIO :9000 (console :9001)
+docker compose run --rm s3-init    # once: creates the dhm-assets and dhm-test buckets
 uv run alembic upgrade head
 uv run dhm seed
 uv run dhm dev
@@ -42,8 +43,11 @@ Settings come from environment variables (or `.env` locally).
 | `SMTP_FROM` | `DHM Group <no-reply@dhmgroup.net>` | Sender of notification emails |
 | `SECRET_KEY` | development placeholder | Signs the admin session cookie. Required in production: 64 random characters |
 | `TIMEZONE` | `Africa/Lusaka` | Time zone for times shown in the admin |
-
-S3 settings are documented here when Phase 3b lands.
+| `S3_ENDPOINT_URL` | `http://localhost:9000` | S3-compatible endpoint; empty for AWS S3 |
+| `S3_REGION` | `us-east-1` | Bucket region |
+| `S3_BUCKET` | `dhm-assets` | Bucket for uploaded assets |
+| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | MinIO dev credentials | Storage credentials |
+| `S3_PUBLIC_BASE_URL` | `http://localhost:9000/dhm-assets` | Public base URL for uploaded files; the bucket must allow anonymous reads |
 
 ## Admin
 
@@ -57,6 +61,11 @@ uv run dhm set-password you@dhmgroup.net   # reset a password
 On Coolify, run `dhm create-admin you@dhmgroup.net` from the application terminal. Sign-in is limited to 5 failed attempts per 15 minutes per address.
 
 Quote requests appear under **Inquiries**, where each lead moves through New, Contacted, Quoted, Won or Lost (or is archived), with notes and an activity timeline.
+
+- **Legal** edits the privacy policy, terms and any other page in Markdown, with a live preview. Drafts stay off the site.
+- **Projects** edits the "Our apps" panels: links, status (live, coming soon, retired), publishing and order.
+- **Settings** holds the contact details, the address that receives quote requests, social links and the four site images (logo, tagline, social share image, favicon).
+- **Assets** uploads images and PDFs (up to 10 MB) to S3. Images need alt text before they can be used as a site image, and an image in use cannot be deleted.
 
 ## Database changes
 
@@ -86,7 +95,8 @@ uv run alembic check
 3. **Environment.** The image already runs with `ENV=production` and refuses to start without a real `SECRET_KEY`. Set `SECRET_KEY`, `DATABASE_URL`, `BASE_URL=https://dhmgroup.net` and the `SMTP_*` variables for the mail server that sends inquiry notifications.
 4. **Domain.** Assign `dhmgroup.net` (and `www.dhmgroup.net` if used). Coolify's proxy handles TLS.
 5. **Deploy.** Migrations run automatically on container start. After the first deploy, open the application terminal in Coolify and run `dhm seed`.
-6. **Health.** The container reports health from `/healthz`, which also checks the database.
+6. **Storage.** Add MinIO as a Coolify service (or use AWS S3 / Cloudflare R2), create the bucket, allow anonymous downloads on it, and set the `S3_*` variables.
+7. **Health.** The container reports health from `/healthz`, which also checks the database.
 
 ## Cutover from GitHub Pages
 

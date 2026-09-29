@@ -8,32 +8,38 @@
         class="flex max-w-2xl flex-col divide-y divide-line">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <fieldset class="flex flex-col gap-4 px-4 py-6 sm:px-6">
-      <legend class="float-left mb-4 w-full text-sm font-medium text-muted">Contact details on dhmgroup.net</legend>
+      <legend class="float-left mb-4 w-full text-base font-semibold">Contact details on dhmgroup.net</legend>
       {{ text_field("contact_email", "Contact email", val("contact_email"), errors.contact_email, type="email", mono=True, required=True) }}
       {{ text_field("phone", "Phone", val("phone"), errors.phone, type="tel", hint="International format, for example +260 770 005 939", mono=True, required=True) }}
       {{ textarea_field("address", "Registered address", val("address"), errors.address, rows=2, hint="One line per address line", maxlength=300) }}
     </fieldset>
     <fieldset class="flex flex-col gap-4 px-4 py-6 sm:px-6">
-      <legend class="float-left mb-4 w-full text-sm font-medium text-muted">Notifications</legend>
+      <legend class="float-left mb-4 w-full text-base font-semibold">Notifications</legend>
       {{ text_field("notify_email", "Send quote requests to", val("notify_email"), errors.notify_email, type="email", hint="Every new quote request is emailed here", mono=True, required=True) }}
     </fieldset>
     <fieldset class="flex flex-col gap-4 px-4 py-6 sm:px-6">
-      <legend class="float-left mb-4 w-full text-sm font-medium text-muted">Social links <span class="font-normal">· leave a link empty to hide its icon</span></legend>
+      <legend class="float-left mb-4 flex w-full flex-col gap-1"><span class="text-base font-semibold">Social links</span><span class="text-xs text-muted">Leave a link empty to hide its icon.</span></legend>
       {% for field, label, icon in socials %}
         {{ text_field(field, label, val(field), errors[field], type="url", mono=True) }}
       {% endfor %}
     </fieldset>
     <fieldset class="flex flex-col gap-4 px-4 py-6 sm:px-6">
-      <legend class="float-left mb-4 w-full text-sm font-medium text-muted">Images <span class="font-normal">· upload in Assets; images need alt text</span></legend>
+      <legend class="float-left mb-4 flex w-full flex-col gap-1"><span class="text-base font-semibold">Images</span><span class="text-xs text-muted">Upload in Assets first. Images need alt text.</span></legend>
       {% for slot, label in slots.items() %}
       {% set current = values[slot] if slot in values else site[slot] %}
+      {% set chosen = images | selectattr("id", "equalto", current) | first %}
       <label class="flex flex-col gap-2 text-sm font-medium">
         {{ label | capitalize }}
+        <span class="flex items-center gap-3">
+        <span class="grid size-11 shrink-0 place-items-center overflow-hidden rounded-lg border border-line bg-panel">
+          {% if chosen %}<img src="{{ chosen.url }}" alt="" class="max-h-full max-w-full object-contain">{% else %}<i class="ph ph-image text-muted" aria-hidden="true"></i>{% endif %}
+        </span>
         <select name="{{ slot }}" {% if errors[slot] %}aria-invalid="true" data-autofocus{% endif %}
-                class="field py-2 text-sm{% if errors[slot] %} !border-brand{% endif %}">
+                class="field min-w-0 flex-1 py-2 text-sm{% if errors[slot] %} !border-brand{% endif %}">
           <option value="">Built-in default</option>
           {% for a in images %}<option value="{{ a.id }}" {% if current == a.id %}selected{% endif %}>{{ a.filename }}{% if not a.alt_text %} (no alt text){% endif %}</option>{% endfor %}
         </select>
+        </span>
         {% if errors[slot] %}<span class="text-sm font-normal text-brand" role="alert">{{ errors[slot] }}</span>{% endif %}
       </label>
       {% endfor %}

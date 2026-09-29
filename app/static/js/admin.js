@@ -37,3 +37,15 @@ document.addEventListener('click', async e => {
   try { await navigator.clipboard.writeText(btn.dataset.copy); toast('URL copied'); }
   catch { toast('Copy failed. Open the image and copy its address instead.'); }
 });
+
+// Destructive confirmations use the admin's own <dialog> instead of window.confirm.
+const confirmDialog = document.getElementById('confirm-dialog');
+document.addEventListener('htmx:confirm', e => {
+  e.preventDefault();
+  const { ctx, issueRequest, dropRequest } = e.detail;
+  confirmDialog.querySelector('#confirm-message').textContent = ctx.confirm;
+  confirmDialog.addEventListener('close', () => {
+    confirmDialog.returnValue === 'confirm' ? issueRequest() : dropRequest();
+  }, { once: true });
+  confirmDialog.showModal();
+});

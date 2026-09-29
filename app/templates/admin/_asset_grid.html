@@ -1,14 +1,23 @@
 {% from "admin/_macros.html" import empty_state %}
 <section id="asset-grid" class="px-4 py-6 sm:px-6">
+  <input type="hidden" id="asset-kind" name="kind" value="{{ kind }}">
+  <nav aria-label="Filter assets" class="-mx-2 mb-4 flex flex-wrap gap-1">
+    {% for value, label in kinds.items() %}
+    {% set href = "/admin/assets?kind=" ~ value ~ ("&q=" ~ (q | urlencode) if q else "") %}
+    <a href="{{ href }}" hx-get="{{ href }}" hx-target="#asset-grid" hx-swap="outerHTML"
+       {% if value == kind %}aria-current="page"{% endif %}
+       class="flex min-h-11 items-center rounded-full px-3 text-sm text-muted transition-colors duration-200 hover:text-white aria-[current=page]:bg-brand aria-[current=page]:text-black sm:min-h-9">{{ label }}</a>
+    {% endfor %}
+  </nav>
   {% if error %}<p class="mb-4 rounded-xl border border-brand/60 px-3 py-3 text-sm" role="alert">{{ error }}</p>{% endif %}
   {% if assets %}
-  <ul class="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-3 xl:grid-cols-5">
+  <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
     {% for a in assets %}
-    <li class="flex flex-col bg-black">
-      <div class="grid aspect-[4/3] place-items-center bg-panel p-4">
+    <li class="flex flex-col overflow-hidden rounded-2xl border border-line">
+      <a href="{{ a.url }}" target="_blank" rel="noopener" class="grid aspect-[4/3] place-items-center bg-panel p-4 transition-colors duration-200 hover:bg-raised" aria-label="Open {{ a.filename }}">
         {% if a.is_image %}<img src="{{ a.url }}" alt="{{ a.alt_text }}" loading="lazy" class="max-h-full max-w-full object-contain">
         {% else %}<i class="ph ph-file-pdf text-4xl text-muted" aria-hidden="true"></i>{% endif %}
-      </div>
+      </a>
       <div class="flex flex-col gap-2 p-3">
         <p class="truncate text-sm font-medium" title="{{ a.filename }}">{{ a.filename }}</p>
         <p class="font-mono text-xs text-muted">{{ (a.size_bytes / 1024) | round(0, "ceil") | int }} KB · {{ a.created_at | local_time }}</p>
@@ -16,20 +25,22 @@
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <label class="sr-only" for="alt-{{ a.id }}">Alt text for {{ a.filename }}</label>
           <input id="alt-{{ a.id }}" name="alt_text" value="{{ a.alt_text }}" maxlength="300" placeholder="Alt text" class="field min-w-0 py-1.5 text-xs">
-          <button type="submit" class="btn btn-ghost px-2 text-xs" aria-label="Save alt text for {{ a.filename }}"><i class="ph ph-check" aria-hidden="true"></i></button>
+          <button type="submit" class="grid size-11 shrink-0 place-items-center rounded-full border border-line transition-colors duration-200 hover:border-white/40 sm:size-9" aria-label="Save alt text for {{ a.filename }}"><i class="ph ph-check" aria-hidden="true"></i></button>
         </form>
         <div class="flex gap-2">
-          <button type="button" data-copy="{{ a.url }}" class="btn btn-ghost flex-1 text-xs"><i class="ph ph-link" aria-hidden="true"></i>Copy URL</button>
+          <button type="button" data-copy="{{ a.url }}" class="btn btn-ghost min-h-11 flex-1 text-xs sm:min-h-9"><i class="ph ph-link" aria-hidden="true"></i>Copy URL</button>
           <form hx-post="/admin/assets/{{ a.id }}/delete" hx-target="#asset-grid" hx-swap="outerHTML"
                 hx-confirm="Delete {{ a.filename }}? This cannot be undone." method="post" action="/admin/assets/{{ a.id }}/delete">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button type="submit" class="btn btn-ghost px-2 text-xs" aria-label="Delete {{ a.filename }}"><i class="ph ph-trash" aria-hidden="true"></i></button>
+            <button type="submit" class="grid size-11 place-items-center rounded-full border border-line transition-colors duration-200 hover:border-white/40 sm:size-9" aria-label="Delete {{ a.filename }}"><i class="ph ph-trash" aria-hidden="true"></i></button>
           </form>
         </div>
       </div>
     </li>
     {% endfor %}
   </ul>
+  {% elif q or kind != "all" %}
+  {{ empty_state("ph-magnifying-glass", "No matches", "Nothing matches this filter. Try All or a shorter search.") }}
   {% else %}
   {{ empty_state("ph-images", "No assets yet", "Upload the logo, tagline artwork, social share image and favicon here, then choose them in Settings.") }}
   {% endif %}

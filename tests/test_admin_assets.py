@@ -85,3 +85,40 @@ async def test_grid_lists_assets(admin_client, session):
 
 async def test_assets_require_login(client):
     assert (await client.get("/admin/assets")).status_code == 303
+
+
+async def test_filter_and_search(admin_client, session):
+    session.add_all(
+        [
+            Asset(
+                key="uploads/a.png",
+                filename="logo.png",
+                content_type="image/png",
+                size_bytes=1,
+                alt_text="Logo",
+            ),
+            Asset(
+                key="uploads/b.png",
+                filename="banner.png",
+                content_type="image/png",
+                size_bytes=1,
+                alt_text="",
+            ),
+            Asset(
+                key="uploads/c.pdf",
+                filename="brochure.pdf",
+                content_type="application/pdf",
+                size_bytes=1,
+            ),
+        ]
+    )
+    await session.commit()
+    names = lambda t: [n for n in ("logo.png", "banner.png", "brochure.pdf") if n in t]  # noqa: E731
+    assert names((await admin_client.get("/admin/assets?kind=pdf", headers=HX)).text) == [
+        "brochure.pdf"
+    ]
+    assert names((await admin_client.get("/admin/assets?kind=no-alt", headers=HX)).text) == [
+        "banner.png"
+    ]
+    assert names((await admin_client.get("/admin/assets?q=LOGO", headers=HX)).text) == ["logo.png"]
+    assert len(names((await admin_client.get("/admin/assets?kind=bogus", headers=HX)).text)) == 3

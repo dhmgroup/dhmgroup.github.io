@@ -12,7 +12,7 @@
         class="flex max-w-2xl flex-col gap-4 px-4 py-6 sm:px-6">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     {{ text_field("name", "Name", val("name"), errors.name, required=True, maxlength=100) }}
-    {{ textarea_field("summary", "Summary", val("summary"), errors.summary, rows=2, hint="One line shown under the name on dhmgroup.net", maxlength=300) }}
+    {{ textarea_field("summary", "Summary", val("summary"), errors.summary, rows=3, hint="One line shown under the name on dhmgroup.net", maxlength=300) }}
     {{ text_field("url", "Project website", val("url"), errors.url, type="url", hint="https:// link, or leave empty", mono=True) }}
     <div class="grid gap-4 sm:grid-cols-2">
       {{ text_field("ios_url", "App Store link", val("ios_url"), errors.ios_url, type="url", hint="Empty shows a disabled button", mono=True) }}

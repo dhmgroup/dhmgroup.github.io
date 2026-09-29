@@ -72,6 +72,13 @@ async def not_authenticated(request: Request, exc: NotAuthenticated):
     return RedirectResponse(login, status_code=303)
 
 
+ADMIN_SECTIONS = {
+    "/admin/inquiries": "inquiries",
+    "/admin/legal": "legal pages",
+    "/admin/projects": "projects",
+    "/admin/settings": "settings",
+    "/admin/assets": "assets",
+}
 ADMIN_ERRORS = {
     404: (
         "Not found",
@@ -88,7 +95,9 @@ ADMIN_ERRORS = {
 
 def _admin_error(request: Request, status_code: int):
     heading, body, icon = ADMIN_ERRORS[status_code]
-    context = {"heading": heading, "body": body, "icon": icon}
+    section = "/".join(request.url.path.split("/")[:3])  # /admin/legal/9 -> /admin/legal
+    back = section if section in ADMIN_SECTIONS else "/admin"
+    context = {"heading": heading, "body": body, "icon": icon, "back": back}
     return templates.TemplateResponse(request, "admin/error.html", context, status_code=status_code)
 
 

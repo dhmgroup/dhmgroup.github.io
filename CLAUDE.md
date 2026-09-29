@@ -21,8 +21,8 @@ Read before changing anything visible:
 | 1 | Public site port (landing, legal, 404, app-ads.txt) | done |
 | 2 | Inquiries: form endpoint, validation, spam guards, SMTP | done |
 | 3a | Admin auth, shell, inquiry pipeline | done |
-| 3b | Admin legal, projects, settings, assets (S3) | next |
-| 4 | Cutover from GitHub Pages to Coolify | not started |
+| 3b | Admin legal, projects, settings, assets (S3) | done |
+| 4 | Cutover from GitHub Pages to Coolify | next |
 
 Update this table in the commit that finishes a phase.
 
@@ -34,7 +34,8 @@ All Python tooling runs through uv.
 
 ```bash
 uv sync                                   # install deps (incl. dev group)
-docker compose up -d --wait               # Postgres on localhost:5433 (dhm, dhm_test), Mailpit SMTP :1025 / UI :8025
+docker compose up -d --wait               # Postgres :5433 (dhm, dhm_test), Mailpit :1025/:8025, MinIO :9000/:9001
+docker compose run --rm s3-init          # once: dhm-assets + dhm-test buckets with public read
 uv run alembic upgrade head               # apply migrations
 uv run dhm seed                           # insert default content (idempotent)
 uv run dhm dev                            # uvicorn --reload + Tailwind watch, http://localhost:8000
@@ -60,10 +61,11 @@ app/
   cli.py          `dhm` command
   seed.py         default content
   auth/           User, argon2 passwords, session + CSRF guard (deps.py), sign-in routes
-  admin/          admin shell: shared admin_context, overview route
-  site/           SiteSettings (single row): contact details, socials, get_site_settings
-  legal/          LegalPage, Markdown rendering, public routes
-  projects/       Project ("Our apps" panels)
+  admin/          admin shell: admin_context, overview, forms.py (Pydantic types, field_errors, hx_toast)
+  assets/         Asset model, magic-byte detect.py, aioboto3 storage.py, admin.py (library)
+  site/           SiteSettings (single row): contact details, socials, image slots; admin.py (settings form)
+  legal/          LegalPage, Markdown rendering, public routes, admin.py (editor + preview)
+  projects/       Project ("Our apps" panels), admin.py (editor + reorder)
   inquiries/      Inquiry + InquiryEvent pipeline, quote form, email notification, POST /inquiries, admin.py (list + record)
   public/         landing page, robots.txt, sitemap.xml, app-ads.txt
   templates/      base.html, public/, admin/ (Ledger shell; see .impeccable/surfaces/app-templates-admin-layout-html.md)
@@ -100,5 +102,7 @@ New feature = new package under `app/` with `models.py` and `routes.py`; add its
 - htmx 4 (npm tag `next`) is not htmx 2. Most examples online are htmx 2; check the htmx 4 docs and the vendored source.
 - ruff excludes `docs/` (it would otherwise reformat code blocks in the plans).
 - Alembic autogenerate cannot add a table-level CHECK constraint to an existing table. Put the check on the column type instead (`Enum(..., create_constraint=True, name=...)`), as `Inquiry.stage` does.
+- The public templates read image slots through `SiteSettings.*_src`, which fall back to `/static/img/*`; keep those fallbacks so an unseeded or slot-less site renders unchanged.
+- Tests use the `dhm-test` bucket: run `docker compose run --rm s3-init` once before the suite.
 - htmx 4 swaps: an element that is replaced while the user types in it loses the caret, and `from:#id` triggers can bind to the outgoing element. Swap a region beside the input (see the inquiry search) rather than the input itself.
 - On Windows a running `uv run dhm dev` locks `.venv/Scripts/dhm.exe`, so `uv sync`/`uv add` fail with "Access is denied". Stop the dev server first, or use `uv add --no-sync` and `uv run --no-sync`.

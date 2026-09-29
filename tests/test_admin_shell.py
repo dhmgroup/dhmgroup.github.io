@@ -73,3 +73,8 @@ async def test_admin_404_uses_admin_error_page(admin_client):
 async def test_public_404_unchanged(client):
     r = await client.get("/no-such-page")
     assert "Everything we do is on the home page" in r.text
+
+
+async def test_admin_404_links_back_to_the_section(admin_client):
+    r = await admin_client.get("/admin/legal/999999")
+    assert 'href="/admin/legal"' in r.text

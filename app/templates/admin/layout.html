@@ -32,6 +32,16 @@
     {% block content %}{% endblock %}
   </main>
 </div>
+<dialog id="confirm-dialog" aria-labelledby="confirm-message"
+        class="m-auto w-[min(26rem,calc(100vw-2rem))] rounded-2xl border border-line bg-panel p-6 text-white backdrop:bg-black/70">
+  <form method="dialog" class="flex flex-col gap-6">
+    <p id="confirm-message" class="text-base"></p>
+    <div class="flex justify-end gap-2">
+      <button value="cancel" class="btn btn-ghost min-h-11 text-sm sm:min-h-9" autofocus>Cancel</button>
+      <button value="confirm" class="btn btn-ghost min-h-11 border-brand/60 text-sm sm:min-h-9"><i class="ph ph-trash" aria-hidden="true"></i>Delete</button>
+    </div>
+  </form>
+</dialog>
 <div id="toasts" class="pointer-events-none fixed inset-x-4 bottom-20 z-50 flex flex-col items-end gap-2 sm:bottom-4 sm:left-auto" aria-live="polite"></div>
 <script src="/static/vendor/htmx/htmx.min.js" defer></script>
 <script src="/static/js/admin.js" defer></script>

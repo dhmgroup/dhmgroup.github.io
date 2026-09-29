@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.admin.context import admin_context
 from app.admin.forms import hx_toast
 from app.assets import storage
-from app.assets.detect import detect
+from app.assets.detect import IMAGE_TYPES, detect
 from app.assets.models import Asset
 from app.auth.deps import require_admin, verify_csrf
 from app.auth.models import User
@@ -20,6 +20,7 @@ router = APIRouter(
     prefix="/admin/assets", dependencies=[Depends(require_admin), Depends(verify_csrf)]
 )
 MAX_BYTES = 10 * 1024 * 1024
+KINDS = {"all": "All", "images": "Images", "pdf": "PDFs", "no-alt": "Missing alt text"}
 
 
 async def asset_references(session: AsyncSession, asset_id: int) -> list[str]:
@@ -34,16 +35,41 @@ async def asset_references(session: AsyncSession, asset_id: int) -> list[str]:
     ]
 
 
-async def _assets(session: AsyncSession):
+async def _assets(session: AsyncSession, kind: str = "all", q: str = ""):
     stmt = select(Asset).order_by(Asset.created_at.desc(), Asset.id.desc())
+    if kind == "images":
+        stmt = stmt.where(Asset.content_type.in_(IMAGE_TYPES))
+    elif kind == "pdf":
+        stmt = stmt.where(Asset.content_type == "application/pdf")
+    elif kind == "no-alt":
+        stmt = stmt.where(Asset.content_type.in_(IMAGE_TYPES), Asset.alt_text == "")
+    if q:
+        stmt = stmt.where(
+            Asset.filename.icontains(q, autoescape=True)
+            | Asset.alt_text.icontains(q, autoescape=True)
+        )
     return (await session.scalars(stmt)).all()
 
 
-async def _grid(request: Request, session: AsyncSession, status_code: int = 200, error: str = ""):
+def _filters(kind: str | None, q: str | None) -> tuple[str, str]:
+    return (kind if kind in KINDS else "all"), (q or "").strip()[:100]
+
+
+async def _grid(
+    request: Request,
+    session: AsyncSession,
+    status_code: int = 200,
+    error: str = "",
+    kind: str = "all",
+    q: str = "",
+):
     context = {
-        "assets": await _assets(session),
+        "assets": await _assets(session, kind, q),
         "csrf_token": request.session["csrf"],
         "error": error,
+        "kinds": KINDS,
+        "kind": kind,
+        "q": q,
     }
     return templates.TemplateResponse(
         request, "admin/_asset_grid.html", context, status_code=status_code
@@ -60,13 +86,25 @@ async def _get(session: AsyncSession, asset_id: int) -> Asset:
 @router.get("")
 async def library(
     request: Request,
+    kind: str | None = None,
+    q: str | None = None,
     session: AsyncSession = Depends(get_session),
     user: User = Depends(require_admin),
 ):
+    kind, q = _filters(kind, q)
     if is_htmx(request):
-        return await _grid(request, session)
+        return await _grid(request, session, kind=kind, q=q)
     context = await admin_context(
-        request, session, user, "assets", "Assets", assets=await _assets(session), error=""
+        request,
+        session,
+        user,
+        "assets",
+        "Assets",
+        assets=await _assets(session, kind, q),
+        error="",
+        kinds=KINDS,
+        kind=kind,
+        q=q,
     )
     return templates.TemplateResponse(request, "admin/assets.html", context)
 
