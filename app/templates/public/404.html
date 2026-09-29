@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Page not found | DHM Group{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block body_class %}grid min-h-dvh place-items-center px-4{% endblock %}
+{% block body %}
+  <main class="flex max-w-[680px] flex-col items-start gap-6">
+    <a href="/"><img src="/static/img/logo-light.png" alt="DHM Group home" class="h-10 w-auto"></a>
+    <h1 class="bg-linear-to-r from-white to-[#9B9B9B] bg-clip-text text-5xl font-semibold tracking-tight text-transparent">This page does not exist.</h1>
+    <p class="text-lg text-neutral-400">The link may be old or mistyped. Everything we do is on the home page.</p>
+    <a href="/" class="btn btn-primary text-base">Back to home</a>
+  </main>
+{% endblock %}

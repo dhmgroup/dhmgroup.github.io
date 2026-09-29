@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}DHM Group{% endblock %}</title>
+    <meta name="description" content="{% block description %}{% endblock %}">
+    <meta name="theme-color" content="#000000">
+    <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+    {% block meta %}{% endblock %}
+    <script>document.documentElement.classList.add('js')</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="/static/vendor/phosphor/regular/style.css">
+    <link rel="stylesheet" href="/static/vendor/phosphor/fill/style.css">
+    <link rel="stylesheet" href="/static/dist/app.css">
+  </head>
+  <body class="{% block body_class %}{% endblock %}">
+    {% block body %}{% endblock %}
+  </body>
+</html>
