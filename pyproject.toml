@@ -12,6 +12,7 @@ dependencies = [
     "markdown-it-py>=4.2",
     "nh3>=0.3.7",
     "pydantic-settings>=2.15",
+    "python-multipart>=0.0.32",
     "sqlalchemy[asyncio]>=2.1.1",
     "uvicorn[standard]>=0.54",
 ]

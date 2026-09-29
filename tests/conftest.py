@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine  # noqa: E4
 from sqlalchemy.pool import NullPool  # noqa: E402
 
 from app.db import get_session  # noqa: E402
+from app.inquiries.routes import quote_limiter  # noqa: E402
 from app.main import app  # noqa: E402
 
 DB_URL = os.environ["DATABASE_URL"]
@@ -66,3 +67,8 @@ async def client(session):
     async with AsyncClient(transport=transport, base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    quote_limiter.clear()
